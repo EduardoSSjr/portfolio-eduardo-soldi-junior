@@ -20,6 +20,7 @@ function createProjectCard(project) {
 
   card.innerHTML = `
     <div>
+      <small>${project.highlight}</small>
       <h3>${project.title}</h3>
       <p>${project.description}</p>
       <div class="tech-list" aria-label="Tecnologias usadas">
