@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Portfolio profissional de Eduardo Soldi Junior, Analista e Desenvolvedor de Sistemas."
+    />
+    <title>Eduardo Soldi Junior | Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="src/css/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="nav container" aria-label="Navegacao principal">
+        <a class="brand" href="#inicio">ESJ</a>
+        <button class="menu-toggle" type="button" aria-label="Abrir menu" aria-expanded="false">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <ul class="nav-links">
+          <li><a href="#sobre">Sobre</a></li>
+          <li><a href="#habilidades">Habilidades</a></li>
+          <li><a href="#projetos">Projetos</a></li>
+          <li><a href="#contato">Contato</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero section" id="inicio">
+        <div class="hero-content container">
+          <p class="eyebrow">Analista e Desenvolvedor de Sistemas</p>
+          <h1>Eduardo Soldi Junior</h1>
+          <p class="hero-text">
+            Desenvolvimento de sistemas, automacoes, dados, inteligencia artificial e
+            infraestrutura com foco em solucoes praticas para o negocio.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#projetos">Ver projetos</a>
+            <a class="button button-secondary" href="#contato">Entrar em contato</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-muted" id="sobre">
+        <div class="container two-column">
+          <div>
+            <p class="section-label">Sobre mim</p>
+            <h2>Perfil tecnico com visao de operacao, suporte e desenvolvimento.</h2>
+          </div>
+          <div class="content-block">
+            <p>
+              Sou Analista e Desenvolvedor de Sistemas com experiencia em suporte tecnico,
+              infraestrutura e automacao de processos. Atuo conectando conhecimento tecnico
+              com necessidades reais do dia a dia, criando melhorias que reduzem retrabalho,
+              organizam informacoes e tornam processos mais eficientes.
+            </p>
+            <p>
+              Minha base inclui ambientes Windows Server, Active Directory, Hyper-V, pfSense,
+              VPNs, atendimento remoto, SQL, Docker, GitHub, Node.js, PostgreSQL, VBA e n8n.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="habilidades">
+        <div class="container">
+          <div class="section-heading">
+            <p class="section-label">Habilidades</p>
+            <h2>Competencias principais</h2>
+          </div>
+          <div class="skills-grid" aria-label="Lista de habilidades">
+            <span>Desenvolvimento de sistemas</span>
+            <span>Analise de sistemas</span>
+            <span>Automacoes</span>
+            <span>Dados</span>
+            <span>Inteligencia artificial</span>
+            <span>Infraestrutura</span>
+            <span>Windows Server</span>
+            <span>Active Directory</span>
+            <span>Hyper-V</span>
+            <span>pfSense e VPNs</span>
+            <span>SQL e PostgreSQL</span>
+            <span>Docker</span>
+            <span>GitHub</span>
+            <span>Node.js</span>
+            <span>VBA</span>
+            <span>n8n</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-muted" id="projetos">
+        <div class="container">
+          <div class="section-heading">
+            <p class="section-label">Projetos</p>
+            <h2>Projetos em destaque</h2>
+            <p>
+              Uma selecao inicial de projetos voltados a automacao, integracoes e melhoria de
+              produtividade.
+            </p>
+          </div>
+          <div class="projects-grid" id="projects-list" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section class="section contact-section" id="contato">
+        <div class="container contact-panel">
+          <div>
+            <p class="section-label">Contato</p>
+            <h2>Vamos conversar sobre tecnologia, sistemas e automacoes.</h2>
+            <p>
+              Atualize os links abaixo com seu e-mail, LinkedIn e GitHub para transformar esta
+              pagina no seu cartao profissional online.
+            </p>
+          </div>
+          <div class="contact-actions">
+            <a class="button button-primary" href="mailto:seuemail@exemplo.com">Enviar e-mail</a>
+            <a class="button button-secondary" href="#" target="_blank" rel="noreferrer">LinkedIn</a>
+            <a class="button button-secondary" href="#" target="_blank" rel="noreferrer">GitHub</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <p>&copy; <span id="current-year"></span> Eduardo Soldi Junior. Todos os direitos reservados.</p>
+      </div>
+    </footer>
+
+    <script src="src/js/projects.js"></script>
+    <script src="src/js/main.js"></script>
+  </body>
+</html>
