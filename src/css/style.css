@@ -376,8 +376,7 @@ h3 {
 }
 
 .about-heading {
-  position: sticky;
-  top: 116px;
+  position: static;
 }
 
 .about-intro {
