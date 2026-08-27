@@ -1,127 +1,201 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Portfolio profissional de Eduardo Soldi Junior, Analista e Desenvolvedor de Sistemas com foco em infraestrutura, automação, dados e integração de sistemas."
+      content="Portfólio profissional de Eduardo Soldi Junior, Analista e Desenvolvedor de Sistemas com foco em infraestrutura, automação, dados e integração de sistemas."
     />
-    <title>Eduardo Soldi Junior | Portfolio</title>
+    <title>Eduardo Soldi Junior | Portfólio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
     <script defer src="/_vercel/insights/script.js"></script>
-    <link rel="stylesheet" href="src/css/style.css" />
+    <link rel="stylesheet" href="/src/css/site.css" />
   </head>
   <body>
     <header class="site-header">
       <nav class="nav container" aria-label="Navegação principal">
-        <a class="brand" href="#inicio">ESJ</a>
-        <button class="menu-toggle" type="button" aria-label="Abrir menu" aria-expanded="false">
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-        <ul class="nav-links">
-          <li><a href="#sobre">Sobre</a></li>
-          <li><a href="#habilidades">Habilidades</a></li>
-          <li><a href="#projetos">Projetos</a></li>
-          <li><a href="#contato">Contato</a></li>
-        </ul>
+        <a class="brand" href="#inicio" aria-label="Eduardo Soldi Junior — início">ESJ</a>
+
+        <div class="nav-controls">
+          <ul class="nav-links">
+            <li><a href="#sobre">Sobre</a></li>
+            <li><a href="#habilidades">Habilidades</a></li>
+            <li><a href="#projetos">Projetos</a></li>
+            <li><a href="#contato">Contato</a></li>
+            <li>
+              <a
+                class="nav-resume resume-download"
+                href="/assets/documents/EduardoSoldiCV.pdf"
+                download="Curriculo-Eduardo-Soldi-Junior.pdf"
+              >
+                CV <span aria-hidden="true">↓</span>
+              </a>
+            </li>
+          </ul>
+
+          <button
+            class="theme-toggle"
+            type="button"
+            aria-label="Ativar modo claro"
+            aria-pressed="false"
+          >
+            <span class="theme-toggle-icon" aria-hidden="true">☼</span>
+            <span class="theme-toggle-label">Claro</span>
+          </button>
+
+          <button class="menu-toggle" type="button" aria-label="Abrir menu" aria-expanded="false">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
       </nav>
     </header>
 
     <main>
       <section class="hero" id="inicio">
+        <div class="hero-glow" aria-hidden="true"></div>
+
         <div class="hero-grid container">
           <div class="hero-content">
-            <p class="eyebrow">Analise, desenvolvimento e operação de TI</p>
-            <h1>Eduardo Soldi Junior</h1>
-            <p class="hero-text">
-              Analista e Desenvolvedor de Sistemas com atuação em infraestrutura,
-              automação, dados e integração de sistemas para ambientes corporativos.
+            <p class="eyebrow" data-hero-reveal>
+              <span class="signal-dot" aria-hidden="true"></span>
+              Analista e Desenvolvedor de Sistemas
             </p>
-            <p class="hero-support">
-              Minha proposta de valor esta em unir visao operacional com execução tecnica,
-              transformando necessidades do dia a dia em processos mais estaveis,
-              produtivos e bem estruturados.
+
+            <h1 data-hero-reveal>
+              Eduardo
+              <span>Soldi Junior.</span>
+            </h1>
+
+            <p class="hero-text" data-hero-reveal>
+              Desenvolvimento, automação e infraestrutura para transformar demandas
+              operacionais em soluções técnicas claras e confiáveis.
             </p>
-            <div class="hero-actions">
-              <a class="button button-primary" href="#projetos">Ver projetos</a>
-              <a class="button button-secondary" href="#contato">Falar comigo</a>
+
+            <p class="hero-support" data-hero-reveal>
+              Experiência prática com ambientes corporativos, integração de sistemas,
+              bancos de dados e melhoria de processos.
+            </p>
+
+            <div class="hero-actions" data-hero-reveal>
+              <a class="button button-primary" href="#projetos">
+                Ver projetos <span aria-hidden="true">↘</span>
+              </a>
+              <a class="button button-secondary" href="#contato">
+                Falar comigo <span aria-hidden="true">↘</span>
+              </a>
+              <a
+                class="button button-tertiary resume-download"
+                href="/assets/documents/EduardoSoldiCV.pdf"
+                download="Curriculo-Eduardo-Soldi-Junior.pdf"
+              >
+                Baixar currículo <span aria-hidden="true">↓</span>
+              </a>
             </div>
-            <div class="hero-summary" aria-label="Resumo profissional">
-              <article>
-                <span>Experiencia</span>
+
+            <div class="hero-meta" data-hero-reveal aria-label="Informações profissionais">
+              <div>
+                <span>Experiência</span>
                 <strong>Mais de 3 anos de atuação em Tecnologia da Informação</strong>
-                <p>Suporte, infraestrutura, automação e operação de ambientes corporativos.</p>
-              </article>
-              <article>
+              </div>
+              <div>
                 <span>Formação</span>
-                <strong>Formação em Analise e Desenvolvimento de Sistemas</strong>
-                <p>Base orientada a software, dados, integração e melhoria de processos.</p>
-              </article>
+                <strong>Tecnólogo em Análise e Desenvolvimento de Sistemas</strong>
+              </div>
             </div>
           </div>
 
-          <div class="hero-visual" aria-label="Resumo visual das areas de atuação">
-            <div class="orbit-card orbit-card-main">
-              <span class="status-dot"></span>
-              <strong>Infraestrutura e ambientes corporativos</strong>
-              <p>Windows Server, Microsoft 365, Entra ID, backup, monitoramento e suporte operacional.</p>
+          <aside class="hero-visual" data-hero-reveal aria-label="Principais áreas de atuação">
+            <div class="visual-heading">
+              <span><i aria-hidden="true"></i> Visão profissional</span>
+              <small>2026</small>
             </div>
-            <div class="orbit-card">
-              <strong>Automação e integração</strong>
-              <p>n8n, VBA, APIs REST, webhooks e integracoes com inteligencia artificial.</p>
+
+            <div class="capability-list">
+              <article class="capability-card capability-card-featured">
+                <span class="capability-index">01</span>
+                <div>
+                  <h2>Infraestrutura corporativa</h2>
+                  <p>Windows Server, Microsoft 365, Entra ID, backup, redes e monitoramento.</p>
+                </div>
+                <span class="capability-mark" aria-hidden="true">↗</span>
+              </article>
+
+              <article class="capability-card">
+                <span class="capability-index">02</span>
+                <div>
+                  <h2>Automação e integração</h2>
+                  <p>n8n, VBA, APIs REST, webhooks e inteligência artificial aplicada.</p>
+                </div>
+                <span class="capability-mark" aria-hidden="true">↗</span>
+              </article>
+
+              <article class="capability-card">
+                <span class="capability-index">03</span>
+                <div>
+                  <h2>Dados e sistemas</h2>
+                  <p>PostgreSQL, MySQL, SQL Server, Node.js, Docker e JavaScript.</p>
+                </div>
+                <span class="capability-mark" aria-hidden="true">↗</span>
+              </article>
             </div>
-            <div class="orbit-card">
-              <strong>Dados e sistemas</strong>
-              <p>PostgreSQL, MySQL, SQL Server, Node.js, Docker e GitHub.</p>
+
+            <div class="visual-footer">
+              <span>Operação</span>
+              <i aria-hidden="true"></i>
+              <span>Análise</span>
+              <i aria-hidden="true"></i>
+              <span>Solução</span>
             </div>
-          </div>
+          </aside>
         </div>
       </section>
 
       <section class="section section-muted" id="sobre">
         <div class="container about-grid">
-          <div class="about-heading">
-            <p class="section-label">Sobre mim</p>
-            <h2>Perfil tecnico com visao de operação, suporte, automação e desenvolvimento.</h2>
+          <div class="about-heading" data-scroll-reveal>
+            <p class="section-label">01 / Sobre mim</p>
+            <h2>Visão operacional com capacidade de construir soluções.</h2>
             <p class="about-intro">
-              Atuo na interseção entre infraestrutura, processos e desenvolvimento, com foco em
-              confiabilidade operacional, produtividade e melhoria continua.
+              Entendo o ambiente, organizo o problema e aplico tecnologia para melhorar a rotina.
             </p>
           </div>
+
           <div class="about-content">
-            <div class="content-block about-copy">
+            <div class="about-copy" data-scroll-reveal>
               <p>
-                Sou profissional de Tecnologia da Informação com experiencia em suporte tecnico,
+                Sou profissional de Tecnologia da Informação com experiência em suporte técnico,
                 administração de ambientes corporativos, automação de processos, bancos de dados
-                e integração de sistemas. Minha atuação busca combinar analise, organização e
-                entrega pratica para melhorar rotinas e reduzir pontos de falha.
+                e integração de sistemas.
               </p>
               <p>
-                Minha base tecnica inclui Windows Server, Active Directory, Hyper-V, Microsoft 365,
-                Microsoft Entra ID, SharePoint, OneDrive, Teams, RMM, rotinas de backup, pfSense,
-                VPNs, SQL, Docker, GitHub, Node.js, PostgreSQL, VBA, n8n e OpenAI API.
+                Minha atuação combina análise, organização e execução técnica para tornar processos
+                mais estáveis, produtivos e fáceis de manter.
               </p>
             </div>
-            <div class="timeline">
+
+            <div class="timeline" data-scroll-reveal aria-label="Experiência profissional">
               <article>
-                <span>Jan/2026 - atual</span>
-                <strong>Suporte Tecnico N1 - Hinfros Solucoes em TI</strong>
+                <span>Jan/2026 — atual</span>
+                <strong>Suporte Técnico N1</strong>
+                <small>Hinfros Soluções em TI</small>
               </article>
               <article>
-                <span>Dez/2024 - Dez/2025</span>
-                <strong>Estagiario em Tecnologia da Informação - Hinfros Solucoes em TI</strong>
+                <span>Dez/2024 — Dez/2025</span>
+                <strong>Estagiário em Tecnologia da Informação</strong>
+                <small>Hinfros Soluções em TI</small>
               </article>
               <article>
-                <span>Nov/2022 - Out/2024</span>
-                <strong>Estagio em Tecnologia da Informação - SINCO Supermercados</strong>
+                <span>Nov/2022 — Out/2024</span>
+                <strong>Estágio em Tecnologia da Informação</strong>
+                <small>SINCO Supermercados</small>
               </article>
             </div>
           </div>
@@ -130,27 +204,33 @@
 
       <section class="section" id="habilidades">
         <div class="container">
-          <div class="section-heading">
-            <p class="section-label">Habilidades</p>
-            <h2>Competencias principais</h2>
+          <div class="section-heading" data-scroll-reveal>
+            <div>
+              <p class="section-label">02 / Habilidades</p>
+              <h2>Competências principais</h2>
+            </div>
+            <p>
+              Uma base técnica multidisciplinar para atuar do diagnóstico à implementação.
+            </p>
           </div>
+
           <div class="skills-grid" aria-label="Lista de habilidades">
-            <article>
+            <article data-scroll-reveal>
               <span>01</span>
               <h3>Infraestrutura</h3>
               <p>Windows Server, Active Directory, Hyper-V, RDS, Microsoft 365, Entra ID e backup.</p>
             </article>
-            <article>
+            <article data-scroll-reveal>
               <span>02</span>
-              <h3>Automacoes</h3>
+              <h3>Automações</h3>
               <p>n8n, VBA, APIs REST, webhooks, OpenAI API e integração de processos.</p>
             </article>
-            <article>
+            <article data-scroll-reveal>
               <span>03</span>
               <h3>Dados e sistemas</h3>
-              <p>PostgreSQL, MySQL, SQL Server, modelagem de dados, Node.js, HTML, CSS e JavaScript.</p>
+              <p>PostgreSQL, MySQL, SQL Server, Node.js, HTML, CSS e JavaScript.</p>
             </article>
-            <article>
+            <article data-scroll-reveal>
               <span>04</span>
               <h3>Operação de TI</h3>
               <p>Suporte remoto, RMM, certificados, redes, DHCP, DNS, pfSense, VLANs e VPNs.</p>
@@ -161,50 +241,66 @@
 
       <section class="section section-muted" id="projetos">
         <div class="container">
-          <div class="section-heading">
-            <p class="section-label">Projetos</p>
-            <h2>Projetos em destaque</h2>
+          <div class="section-heading" data-scroll-reveal>
+            <div>
+              <p class="section-label">03 / Projetos</p>
+              <h2>Projetos em destaque</h2>
+            </div>
             <p>
-              Projetos que mostram minha atuação em automação, integração de sistemas,
-              produtividade, dados e desenvolvimento web.
+              Aplicações de automação, integração, dados e desenvolvimento web.
             </p>
           </div>
+
           <div class="projects-grid" id="projects-list" aria-live="polite"></div>
         </div>
       </section>
 
       <section class="section contact-section" id="contato">
         <div class="container contact-panel">
-          <div class="contact-copy">
-            <p class="section-label">Contato</p>
-            <h2>Disponivel para oportunidades, projetos e conversas profissionais.</h2>
+          <div class="contact-copy" data-scroll-reveal>
+            <p class="section-label">04 / Contato</p>
+            <h2>Disponível para oportunidades e projetos.</h2>
             <p>
-              Estou em Tremembe/SP e aberto a conversas sobre tecnologia, automação,
-              integração de sistemas e melhoria de processos em ambientes corporativos.
+              Estou em Tremembé/SP e aberto a conversas sobre tecnologia, automação,
+              integração de sistemas ou melhoria de processos.
             </p>
+
+            <div class="contact-actions">
+              <a class="button button-primary" href="mailto:eduardosjr06@gmail.com?subject=Contato%20via%20portfolio">
+                Enviar e-mail <span aria-hidden="true">↗</span>
+              </a>
+              <a
+                class="contact-resume resume-download"
+                href="/assets/documents/EduardoSoldiCV.pdf"
+                download="Curriculo-Eduardo-Soldi-Junior.pdf"
+              >
+                Baixar currículo <span aria-hidden="true">↓</span>
+              </a>
+            </div>
           </div>
-          <div class="contact-card">
+
+          <div class="contact-card" data-scroll-reveal>
             <div class="contact-list" aria-label="Canais de contato">
               <a class="contact-item" href="mailto:eduardosjr06@gmail.com">
                 <span class="contact-label">E-mail</span>
                 <strong>eduardosjr06@gmail.com</strong>
+                <i aria-hidden="true">↗</i>
               </a>
               <a class="contact-item" href="https://wa.me/5512982022685" target="_blank" rel="noreferrer">
                 <span class="contact-label">WhatsApp</span>
                 <strong>(12) 98202-2685</strong>
+                <i aria-hidden="true">↗</i>
               </a>
               <a class="contact-item" href="https://linkedin.com/in/eduardosoldi" target="_blank" rel="noreferrer">
                 <span class="contact-label">LinkedIn</span>
                 <strong>linkedin.com/in/eduardosoldi</strong>
+                <i aria-hidden="true">↗</i>
               </a>
               <a class="contact-item" href="https://github.com/EduardoSSjr" target="_blank" rel="noreferrer">
                 <span class="contact-label">GitHub</span>
                 <strong>github.com/EduardoSSjr</strong>
+                <i aria-hidden="true">↗</i>
               </a>
-            </div>
-            <div class="contact-actions">
-              <a class="button button-primary" href="mailto:eduardosjr06@gmail.com?subject=Contato%20via%20portfolio">Enviar e-mail</a>
-              <a class="button button-secondary" href="https://wa.me/5512982022685" target="_blank" rel="noreferrer">Enviar mensagem</a>
             </div>
           </div>
         </div>
@@ -212,21 +308,24 @@
     </main>
 
     <footer class="site-footer">
-      <div class="container">
-        <p>&copy; <span id="current-year"></span> Eduardo Soldi Junior. Todos os direitos reservados.</p>
+      <div class="container footer-content">
+        <p>&copy; <span id="current-year"></span> Eduardo Soldi Junior.</p>
+        <a href="#inicio">Voltar ao início <span aria-hidden="true">↑</span></a>
       </div>
     </footer>
 
-    <div class="modal" id="project-modal" aria-hidden="true">
+    <div class="modal" id="project-modal" aria-hidden="true" hidden>
       <div class="modal-backdrop" data-close-modal="true"></div>
       <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <button class="modal-close" type="button" aria-label="Fechar detalhes do projeto" data-close-modal="true">
-          Fechar
+          Fechar <span aria-hidden="true">×</span>
         </button>
+
         <div class="modal-content">
           <p class="section-label" id="modal-highlight"></p>
           <h3 id="modal-title"></h3>
           <p id="modal-description"></p>
+
           <div class="modal-grid">
             <article>
               <span>Contexto</span>
@@ -237,15 +336,15 @@
               <p id="modal-impact"></p>
             </article>
           </div>
+
           <div class="tech-list" id="modal-technologies" aria-label="Tecnologias do projeto"></div>
           <a class="button button-primary modal-link" id="modal-link" href="#" target="_blank" rel="noreferrer">
-            Acessar projeto
+            Acessar projeto <span aria-hidden="true">↗</span>
           </a>
         </div>
       </div>
     </div>
 
-    <script src="src/js/projects.js"></script>
-    <script src="src/js/main.js"></script>
+    <script type="module" src="/src/js/site.js"></script>
   </body>
 </html>

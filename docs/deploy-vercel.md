@@ -1,12 +1,20 @@
 # Deploy na Vercel
 
-Este projeto esta preparado para deploy como site estatico.
+O projeto usa Vite durante o desenvolvimento e o build. A saída continua sendo um site estático.
 
-## Configuracao recomendada
+## Configuração recomendada
 
-- Framework preset: Other
-- Build command: deixe vazio
-- Output directory: deixe vazio ou use a raiz do projeto
-- Install command: deixe vazio
+- Framework preset: Vite
+- Install command: `pnpm install`
+- Build command: `pnpm build`
+- Output directory: `dist`
 
-Depois de importar o repositorio na Vercel, configure o dominio proprio e atualize os registros DNS na Hostinger conforme a tela de dominios da Vercel informar.
+O Vercel Analytics permanece configurado pelo script em `index.html`.
+
+## Publicação
+
+1. Validar a versão local em desktop e celular.
+2. Obter aprovação visual explícita.
+3. Enviar ao GitHub e publicar na Vercel preservando o domínio `esjr.com.br`.
+
+Não publicar antes da aprovação visual.

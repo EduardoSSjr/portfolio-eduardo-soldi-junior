@@ -1,26 +1,44 @@
 # Portfolio Eduardo Soldi Junior
 
-Primeira versao do portfolio profissional de Eduardo Soldi Junior, Analista e Desenvolvedor de Sistemas.
+Portfólio profissional de Eduardo Soldi Junior, Analista e Desenvolvedor de Sistemas.
 
-O projeto foi criado com HTML, CSS e JavaScript puro, com foco em uma pagina responsiva, limpa e preparada para deploy futuro na Vercel.
+O projeto usa Vite, HTML, CSS, JavaScript puro e GSAP. A versão de produção continua sendo um site estático, responsivo e compatível com a Vercel.
 
 ## Estrutura
 
 ```text
 .
-├── assets/images
+├── assets/documents
 ├── docs
 ├── index.html
-├── src/css/style.css
-├── src/js/main.js
-└── src/js/projects.js
+├── package.json
+├── src
+│   ├── css/site.css
+│   └── js
+│       ├── projects.js
+│       └── site.js
+└── pnpm-lock.yaml
 ```
 
-## Como abrir localmente
+## Como executar localmente
 
-Basta abrir o arquivo `index.html` no navegador.
+Instale as dependências:
 
-Tambem e possivel usar uma extensao como Live Server no VS Code para recarregamento automatico durante edicoes.
+```bash
+pnpm install
+```
+
+Inicie o ambiente de desenvolvimento:
+
+```bash
+pnpm dev
+```
+
+Para gerar a versão estática otimizada:
+
+```bash
+pnpm build
+```
 
 ## Como adicionar novos projetos
 
@@ -63,12 +81,13 @@ git push -u origin main
 
 Se preferir usar outro nome de repositorio, ajuste a URL do remote.
 
-## Deploy futuro na Vercel
+## Deploy na Vercel
 
-1. Envie o projeto para um repositorio no GitHub.
-2. Acesse a Vercel e importe esse repositorio.
-3. Como o projeto e estatico, a Vercel deve reconhecer automaticamente a estrutura.
-4. Configure o dominio na Vercel.
-5. Atualize os apontamentos DNS na Hostinger conforme as instrucoes da Vercel.
+1. Após aprovação visual, envie o projeto ao GitHub.
+2. Importe o repositório na Vercel.
+3. Use o preset Vite.
+4. Build command: `pnpm build`.
+5. Output directory: `dist`.
+6. Preserve o domínio e o script do Vercel Analytics já presente no HTML.
 
-Como este projeto usa apenas arquivos estaticos, nao e necessario configurar build command.
+A publicação só deve ocorrer após aprovação explícita da versão local.
