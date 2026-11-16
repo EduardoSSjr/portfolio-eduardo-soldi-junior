@@ -1,7 +1,7 @@
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import resumeUrl from "../../assets/documents/EduardoSoldiCV.pdf?url";
-import { projects } from "./projects.js";
+import { ORIGIN_LABELS, isOpenSource, projects } from "./projects.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -48,34 +48,53 @@ function setupResumeLinks() {
 }
 
 function createProjectCard(project, index) {
-  const card = document.createElement("button");
+  const card = document.createElement("article");
+  const titleId = `projeto-${index + 1}-titulo`;
   const technologies = project.technologies
     .map((technology) => `<span>${technology}</span>`)
     .join("");
 
   card.className = "project-card";
-  card.type = "button";
-  card.dataset.project = project.title;
-  card.setAttribute("aria-label", `Abrir detalhes do projeto ${project.title}`);
+  card.setAttribute("aria-labelledby", titleId);
   card.setAttribute("data-scroll-reveal", "");
 
   card.innerHTML = `
     <div class="project-card-top">
-      <small>${project.highlight}</small>
+      <div class="project-tags">
+        <span class="project-origin">${ORIGIN_LABELS[project.origin]}</span>
+        <small>${project.highlight}</small>
+        ${project.inProgress ? `<span class="project-status">Em evolução</span>` : ""}
+      </div>
       <span class="project-number">${String(index + 1).padStart(2, "0")}</span>
     </div>
-    <h3>${project.title}</h3>
+    <h3 id="${titleId}">${project.title}</h3>
     <p>${project.description}</p>
     <div class="tech-list" aria-label="Tecnologias usadas">
       ${technologies}
     </div>
-    <span class="project-action">
-      Ver detalhes
-      <i aria-hidden="true">↗</i>
-    </span>
+    <div class="project-actions">
+      <button class="project-action" type="button" aria-label="Ver detalhes do projeto ${project.title}">
+        Ver detalhes
+        <i aria-hidden="true">↗</i>
+      </button>
+      ${
+        isOpenSource(project)
+          ? `<a class="project-repository" href="${project.repository}" target="_blank" rel="noreferrer">
+              Código no GitHub <span aria-hidden="true">↗</span>
+            </a>`
+          : ""
+      }
+    </div>
   `;
 
-  card.addEventListener("click", () => openProjectModal(project, card));
+  const detailsButton = card.querySelector(".project-action");
+
+  // O card inteiro continua clicável com o mouse; o botão é o caminho de
+  // teclado e leitor de tela. Um link dentro de um <button> seria HTML inválido.
+  card.addEventListener("click", (event) => {
+    if (event.target.closest("a")) return;
+    openProjectModal(project, detailsButton);
+  });
   return card;
 }
 
@@ -111,9 +130,9 @@ function openProjectModal(project, trigger) {
     .map((technology) => `<span>${technology}</span>`)
     .join("");
 
-  if (project.url && project.url !== "#") {
+  if (isOpenSource(project)) {
     modalLink.hidden = false;
-    modalLink.href = project.url;
+    modalLink.href = project.repository;
   } else {
     modalLink.hidden = true;
     modalLink.removeAttribute("href");
@@ -124,11 +143,13 @@ function openProjectModal(project, trigger) {
   document.body.classList.add("modal-open");
   modal.querySelector(".modal-close")?.focus();
 
+  // Anima só opacidade, nunca visibility: o conteúdo precisa continuar focável
+  // durante a animação, senão um Tab rápido escapa do modal.
   if (!reducedMotion.matches) {
     gsap.fromTo(
       modalDialog,
-      { y: 24, autoAlpha: 0, scale: 0.985 },
-      { y: 0, autoAlpha: 1, scale: 1, duration: 0.34, ease: "power3.out" },
+      { y: 24, opacity: 0, scale: 0.985 },
+      { y: 0, opacity: 1, scale: 1, duration: 0.34, ease: "power3.out" },
     );
   }
 }
@@ -150,7 +171,7 @@ function closeProjectModal() {
 
   gsap.to(modalDialog, {
     y: 14,
-    autoAlpha: 0,
+    opacity: 0,
     duration: 0.18,
     ease: "power2.in",
     onComplete: finishClosing,

@@ -12,11 +12,13 @@ O projeto usa Vite, HTML, CSS, JavaScript puro e GSAP. A versão de produção c
 ├── docs
 ├── index.html
 ├── package.json
+├── playwright.config.js
 ├── src
 │   ├── css/site.css
 │   └── js
 │       ├── projects.js
 │       └── site.js
+├── tests
 └── pnpm-lock.yaml
 ```
 
@@ -40,20 +42,41 @@ Para gerar a versão estática otimizada:
 pnpm build
 ```
 
-## Como adicionar novos projetos
+## Testes
 
-Edite o arquivo `src/js/projects.js` e adicione um novo item no array `projects`:
+A suíte usa [Playwright](https://playwright.dev) e roda contra o **build de produção** (`vite build` + `vite preview`), o mesmo artefato publicado na Vercel. Os testes verificam só o comportamento visível — o que o visitante vê e faz — e não a estrutura interna do código, para sobreviver a mudanças de visual.
 
-```js
-{
-  title: "Nome do projeto",
-  description: "Descricao curta do projeto.",
-  technologies: ["Tecnologia 1", "Tecnologia 2"],
-  url: "https://link-do-projeto.com"
-}
+Na primeira vez, instale o navegador:
+
+```bash
+pnpm exec playwright install chromium
 ```
 
-Se ainda nao houver link publico para o projeto, mantenha `url: "#"`.
+Depois, rode a suíte:
+
+```bash
+pnpm test
+```
+
+## Como adicionar novos projetos
+
+Edite `src/js/projects.js` e adicione um item ao array `projects`, envolvido em `defineProject`:
+
+```js
+defineProject({
+  title: "Nome do projeto",
+  origin: "corporate", // "open-source" | "corporate" | "academic"
+  description: "Descrição curta, exibida no card.",
+  technologies: ["Tecnologia 1", "Tecnologia 2"],
+  highlight: "Área do projeto",
+  context: "Qual problema o projeto resolve (exibido nos detalhes).",
+  impact: "O que mudou, sem números inventados (exibido nos detalhes).",
+  repository: "https://github.com/...", // só para "open-source", obrigatório nele
+  inProgress: true, // opcional: exibe a etiqueta "Em evolução"
+})
+```
+
+A `origin` decide como o projeto aparece (veja os termos em `GLOSSARY.md`): só projetos de código aberto têm repositório e o atalho "Código no GitHub". Uma combinação inválida — código aberto sem repositório, outra origem com repositório, origem desconhecida — lança um erro ao carregar o site, em vez de exibir um card inconsistente.
 
 ## Como fazer novos commits
 
