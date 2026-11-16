@@ -1,8 +1,14 @@
+const OPEN_SOURCE = "open-source";
+
 export const ORIGIN_LABELS = {
-  "open-source": "Código aberto",
+  [OPEN_SOURCE]: "Código aberto",
   corporate: "Corporativo",
   academic: "Acadêmico",
 };
+
+export function isOpenSource(project) {
+  return project.origin === OPEN_SOURCE;
+}
 
 // Falha alto em vez de renderizar um card inconsistente: a origem decide se o
 // projeto pode (e precisa) ter repositório público.
@@ -12,10 +18,10 @@ export function defineProject(project) {
   if (!(origin in ORIGIN_LABELS)) {
     throw new Error(`Projeto "${title}": origem "${origin}" desconhecida.`);
   }
-  if (origin === "open-source" && !repository) {
+  if (isOpenSource(project) && !repository) {
     throw new Error(`Projeto "${title}": código aberto precisa de repositório.`);
   }
-  if (origin !== "open-source" && repository) {
+  if (!isOpenSource(project) && repository) {
     throw new Error(`Projeto "${title}": origem ${ORIGIN_LABELS[origin]} não pode ter repositório.`);
   }
   return project;

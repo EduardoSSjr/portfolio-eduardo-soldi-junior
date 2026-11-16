@@ -27,3 +27,7 @@ _Avoid_: profissional, interno, privado
 **Acadêmico**:
 Origem de um projeto feito como parte da formação, por exemplo o projeto integrador da FATEC.
 _Avoid_: faculdade, estudo
+
+**Em evolução**:
+Estado de um projeto que Eduardo continua desenvolvendo ativamente, sinalizado para que lacunas atuais sejam lidas como trabalho em andamento.
+_Avoid_: beta, em desenvolvimento, WIP

@@ -872,7 +872,6 @@ h3 {
   background: var(--surface);
   padding: 24px;
   cursor: pointer;
-  text-align: left;
   transition: border-color 220ms ease, transform 220ms ease, box-shadow 220ms ease;
 }
 
@@ -903,7 +902,6 @@ h3 {
 .project-card:focus-within {
   border-color: rgba(85, 231, 240, 0.38);
   box-shadow: 0 24px 56px rgba(0, 0, 0, 0.28);
-  outline: 0;
   transform: translateY(-7px);
 }
 
@@ -1016,7 +1014,8 @@ h3 {
   text-transform: uppercase;
 }
 
-.project-repository:hover {
+.project-repository:hover,
+.project-repository:focus-visible {
   color: var(--cyan);
 }
 

@@ -16,7 +16,7 @@ test("projeto de código aberto com repositório é aceito", () => {
   expect(defineProject(projeto)).toEqual(projeto);
 });
 
-test("projeto corporativo ou acadêmico sem repositório é aceito", () => {
+test("projeto sem código público (corporativo ou acadêmico) é aceito sem repositório", () => {
   expect(() => defineProject({ ...base, origin: "corporate" })).not.toThrow();
   expect(() => defineProject({ ...base, origin: "academic" })).not.toThrow();
 });

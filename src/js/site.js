@@ -1,7 +1,7 @@
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import resumeUrl from "../../assets/documents/EduardoSoldiCV.pdf?url";
-import { ORIGIN_LABELS, projects } from "./projects.js";
+import { ORIGIN_LABELS, isOpenSource, projects } from "./projects.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -55,7 +55,6 @@ function createProjectCard(project, index) {
     .join("");
 
   card.className = "project-card";
-  card.dataset.project = project.title;
   card.setAttribute("aria-labelledby", titleId);
   card.setAttribute("data-scroll-reveal", "");
 
@@ -79,7 +78,7 @@ function createProjectCard(project, index) {
         <i aria-hidden="true">↗</i>
       </button>
       ${
-        project.repository
+        isOpenSource(project)
           ? `<a class="project-repository" href="${project.repository}" target="_blank" rel="noreferrer">
               Código no GitHub <span aria-hidden="true">↗</span>
             </a>`
@@ -131,7 +130,7 @@ function openProjectModal(project, trigger) {
     .map((technology) => `<span>${technology}</span>`)
     .join("");
 
-  if (project.repository) {
+  if (isOpenSource(project)) {
     modalLink.hidden = false;
     modalLink.href = project.repository;
   } else {
@@ -144,11 +143,13 @@ function openProjectModal(project, trigger) {
   document.body.classList.add("modal-open");
   modal.querySelector(".modal-close")?.focus();
 
+  // Anima só opacidade, nunca visibility: o conteúdo precisa continuar focável
+  // durante a animação, senão um Tab rápido escapa do modal.
   if (!reducedMotion.matches) {
     gsap.fromTo(
       modalDialog,
-      { y: 24, autoAlpha: 0, scale: 0.985 },
-      { y: 0, autoAlpha: 1, scale: 1, duration: 0.34, ease: "power3.out" },
+      { y: 24, opacity: 0, scale: 0.985 },
+      { y: 0, opacity: 1, scale: 1, duration: 0.34, ease: "power3.out" },
     );
   }
 }
@@ -170,7 +171,7 @@ function closeProjectModal() {
 
   gsap.to(modalDialog, {
     y: 14,
-    autoAlpha: 0,
+    opacity: 0,
     duration: 0.18,
     ease: "power2.in",
     onComplete: finishClosing,
