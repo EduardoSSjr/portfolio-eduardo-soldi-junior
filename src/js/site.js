@@ -342,6 +342,20 @@ function setupMotion() {
 
 currentYear.textContent = new Date().getFullYear();
 renderProjects();
+
+// PROTÓTIPO (#3): só em `pnpm dev`; o Vite remove este bloco do build.
+if (import.meta.env.DEV) {
+  import("./prototype-cards.js").then(({ mountPrototype }) =>
+    mountPrototype({
+      list: projectsList,
+      projects,
+      ORIGIN_LABELS,
+      isOpenSource,
+      openProjectModal,
+      renderCurrent: renderProjects,
+    }),
+  );
+}
 setupResumeLinks();
 setupTheme();
 setupMenu();
