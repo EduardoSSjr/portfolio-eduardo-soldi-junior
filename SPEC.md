@@ -27,7 +27,7 @@ Eduardo combina experiencia real em operacao e infraestrutura corporativa com de
 - Cargo: Analista e Desenvolvedor de Sistemas.
 - Focos: desenvolvimento de sistemas, analise de sistemas, automacoes, dados, inteligencia artificial e infraestrutura.
 - Contatos atuais: eduardosjr06@gmail.com, WhatsApp +55 12 98202-2685, LinkedIn linkedin.com/in/eduardosoldi, GitHub github.com/EduardoSSjr.
-- Projetos existentes em src/js/projects.js, mantidos como dados editaveis e exibidos em cards/modais.
+- Projetos existentes em src/js/projects.js, mantidos como dados editaveis e exibidos na Vitrine (abas + painel com descricao, contexto e resultado).
 - Secoes: inicio, sobre, habilidades, projetos e contato.
 - Vercel Analytics ja esta configurado via script em index.html.
 
@@ -45,6 +45,16 @@ Eduardo combina experiencia real em operacao e infraestrutura corporativa com de
 - Uma interacao visual de maior impacto na primeira tela e movimento leve nas demais secoes.
 - Respeitar prefers-reduced-motion: reduzir ou remover animacoes para usuarios que solicitam menos movimento.
 - Nenhuma animacao deve bloquear navegacao, esconder informacao ou causar mudancas bruscas de layout.
+
+### Orcamento de movimento
+
+Clareza vem antes de efeito: um site sobrecarregado de animacao parece menos profissional, nao mais.
+
+- No maximo um efeito de destaque por tela (por exemplo, a Vitrine fixa guiada pelo scroll); o resto usa entradas discretas.
+- Nenhuma animacao passa de ~0,8 s.
+- Todo efeito tem um equivalente sem movimento, usado com prefers-reduced-motion: o conteudo e a navegacao continuam completos.
+- Animacoes mexem em opacidade e transformacao, nunca em visibility ou display de conteudo que precisa ser lido ou focado.
+- Sem cursor personalizado.
 
 ## Requisitos Tecnicos
 

@@ -10,18 +10,8 @@ const themeToggle = document.querySelector(".theme-toggle");
 const menuToggle = document.querySelector(".menu-toggle");
 const navLinks = document.querySelector(".nav-links");
 const siteHeader = document.querySelector(".site-header");
-const projectsList = document.querySelector("#projects-list");
+const showcase = document.querySelector("#projects-showcase");
 const currentYear = document.querySelector("#current-year");
-const modal = document.querySelector("#project-modal");
-const modalDialog = modal?.querySelector(".modal-dialog");
-const modalTitle = document.querySelector("#modal-title");
-const modalHighlight = document.querySelector("#modal-highlight");
-const modalDescription = document.querySelector("#modal-description");
-const modalContext = document.querySelector("#modal-context");
-const modalImpact = document.querySelector("#modal-impact");
-const modalTechnologies = document.querySelector("#modal-technologies");
-const modalLink = document.querySelector("#modal-link");
-let lastFocusedElement = null;
 
 function setupTheme() {
   if (!themeToggle) return;
@@ -47,135 +37,193 @@ function setupResumeLinks() {
   });
 }
 
-function createProjectCard(project, index) {
-  const card = document.createElement("article");
-  const titleId = `projeto-${index + 1}-titulo`;
+const formatNumber = (index) => String(index + 1).padStart(2, "0");
+
+function renderProjectPanel(project, index) {
   const technologies = project.technologies
     .map((technology) => `<span>${technology}</span>`)
     .join("");
 
-  card.className = "project-card";
-  card.setAttribute("aria-labelledby", titleId);
-  card.setAttribute("data-scroll-reveal", "");
-
-  card.innerHTML = `
-    <div class="project-card-top">
-      <div class="project-tags">
-        <span class="project-origin">${ORIGIN_LABELS[project.origin]}</span>
+  return `
+    <div class="showcase-top">
+      <div class="showcase-tags">
+        <span class="showcase-origin">${ORIGIN_LABELS[project.origin]}</span>
         <small>${project.highlight}</small>
-        ${project.inProgress ? `<span class="project-status">Em evolução</span>` : ""}
+        ${project.inProgress ? `<span class="showcase-status">Em evolução</span>` : ""}
       </div>
-      <span class="project-number">${String(index + 1).padStart(2, "0")}</span>
+      <span class="showcase-count">${formatNumber(index)} / ${formatNumber(projects.length - 1)}</span>
     </div>
-    <h3 id="${titleId}">${project.title}</h3>
-    <p>${project.description}</p>
-    <div class="tech-list" aria-label="Tecnologias usadas">
-      ${technologies}
+    <h3>${project.title}</h3>
+    <p class="showcase-description">${project.description}</p>
+    <div class="showcase-details">
+      <div>
+        <span>Contexto</span>
+        <p>${project.context}</p>
+      </div>
+      <div>
+        <span>Resultado</span>
+        <p>${project.impact}</p>
+      </div>
     </div>
-    <div class="project-actions">
-      <button class="project-action" type="button" aria-label="Ver detalhes do projeto ${project.title}">
-        Ver detalhes
-        <i aria-hidden="true">↗</i>
-      </button>
-      ${
-        isOpenSource(project)
-          ? `<a class="project-repository" href="${project.repository}" target="_blank" rel="noreferrer">
-              Código no GitHub <span aria-hidden="true">↗</span>
-            </a>`
-          : ""
-      }
-    </div>
+    <div class="showcase-technologies" aria-label="Tecnologias usadas">${technologies}</div>
+    ${
+      isOpenSource(project)
+        ? `<a class="showcase-repository" href="${project.repository}" target="_blank" rel="noreferrer">
+            Ver no GitHub <span aria-hidden="true">↗</span>
+          </a>`
+        : ""
+    }
   `;
+}
 
-  const detailsButton = card.querySelector(".project-action");
+// A Vitrine: abas (lista de projetos) + um painel com o projeto selecionado.
+function setupShowcase() {
+  if (!showcase) return;
 
-  // O card inteiro continua clicável com o mouse; o botão é o caminho de
-  // teclado e leitor de tela. Um link dentro de um <button> seria HTML inválido.
-  card.addEventListener("click", (event) => {
-    if (event.target.closest("a")) return;
-    openProjectModal(project, detailsButton);
+  const tablist = showcase.querySelector(".showcase-tabs");
+  const panel = showcase.querySelector(".showcase-panel");
+  let selectedIndex = -1;
+  // Só existe enquanto a Vitrine está fixa (desktop, sem preferência por menos movimento).
+  let scrollToProject = null;
+
+  const tabs = projects.map((project, index) => {
+    const tab = document.createElement("button");
+    tab.type = "button";
+    tab.className = "showcase-tab";
+    tab.id = `projeto-aba-${index + 1}`;
+    tab.setAttribute("role", "tab");
+    tab.setAttribute("aria-controls", panel.id);
+    tab.innerHTML = `
+      <span class="showcase-tab-number" aria-hidden="true">${formatNumber(index)}</span>
+      <span class="showcase-tab-title">${project.title.split(" — ")[0]}</span>
+      <span class="showcase-tab-origin">${ORIGIN_LABELS[project.origin]}</span>
+    `;
+    tab.addEventListener("click", () => goTo(index));
+    return tab;
   });
-  return card;
-}
 
-function renderProjects() {
-  if (!projectsList) return;
+  function select(index) {
+    if (index === selectedIndex) return;
+    const isFirstRender = selectedIndex === -1;
+    selectedIndex = index;
 
-  projectsList.replaceChildren();
-  projects.forEach((project, index) => {
-    projectsList.appendChild(createProjectCard(project, index));
-  });
-}
+    tabs.forEach((tab, tabIndex) => {
+      const isSelected = tabIndex === index;
+      tab.setAttribute("aria-selected", String(isSelected));
+      tab.tabIndex = isSelected ? 0 : -1;
+    });
+    panel.setAttribute("aria-labelledby", tabs[index].id);
+    panel.innerHTML = renderProjectPanel(projects[index], index);
 
-function getFocusableElements() {
-  if (!modalDialog) return [];
-
-  return [
-    ...modalDialog.querySelectorAll(
-      'a[href]:not([hidden]), button:not([disabled]), [tabindex]:not([tabindex="-1"])',
-    ),
-  ];
-}
-
-function openProjectModal(project, trigger) {
-  if (!modal) return;
-
-  lastFocusedElement = trigger;
-  modalHighlight.textContent = project.highlight;
-  modalTitle.textContent = project.title;
-  modalDescription.textContent = project.description;
-  modalContext.textContent = project.context;
-  modalImpact.textContent = project.impact;
-  modalTechnologies.innerHTML = project.technologies
-    .map((technology) => `<span>${technology}</span>`)
-    .join("");
-
-  if (isOpenSource(project)) {
-    modalLink.hidden = false;
-    modalLink.href = project.repository;
-  } else {
-    modalLink.hidden = true;
-    modalLink.removeAttribute("href");
+    // Só opacidade e deslocamento: o conteúdo nunca fica invisível para leitores de tela.
+    if (!isFirstRender && !reducedMotion.matches) {
+      gsap.fromTo(
+        panel.children,
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.32, stagger: 0.03, ease: "power2.out" },
+      );
+    }
   }
 
-  modal.hidden = false;
-  modal.setAttribute("aria-hidden", "false");
-  document.body.classList.add("modal-open");
-  modal.querySelector(".modal-close")?.focus();
-
-  // Anima só opacidade, nunca visibility: o conteúdo precisa continuar focável
-  // durante a animação, senão um Tab rápido escapa do modal.
-  if (!reducedMotion.matches) {
-    gsap.fromTo(
-      modalDialog,
-      { y: 24, opacity: 0, scale: 0.985 },
-      { y: 0, opacity: 1, scale: 1, duration: 0.34, ease: "power3.out" },
-    );
+  // Com a Vitrine fixa, a aba e o scroll precisam concordar: escolher uma aba
+  // rola até o trecho dela, e a seleção acompanha o scroll.
+  function goTo(index) {
+    select(index);
+    scrollToProject?.(index);
   }
-}
 
-function closeProjectModal() {
-  if (!modal || modal.hidden) return;
-
-  const finishClosing = () => {
-    modal.hidden = true;
-    modal.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("modal-open");
-    lastFocusedElement?.focus();
+  // Padrão de abas da ARIA: setas (com volta nas pontas), Home e End.
+  const keyTargets = {
+    ArrowDown: (index) => (index + 1) % tabs.length,
+    ArrowRight: (index) => (index + 1) % tabs.length,
+    ArrowUp: (index) => (index - 1 + tabs.length) % tabs.length,
+    ArrowLeft: (index) => (index - 1 + tabs.length) % tabs.length,
+    Home: () => 0,
+    End: () => tabs.length - 1,
   };
 
-  if (reducedMotion.matches) {
-    finishClosing();
-    return;
+  tablist.addEventListener("keydown", (event) => {
+    const target = keyTargets[event.key];
+    if (!target) return;
+
+    event.preventDefault();
+    const index = target(selectedIndex);
+    goTo(index);
+    tabs[index].focus();
+  });
+
+  tablist.replaceChildren(...tabs);
+  select(0);
+
+  // No celular as abas viram uma faixa horizontal (veja o CSS).
+  const narrow = window.matchMedia("(max-width: 880px)");
+  const updateOrientation = () =>
+    tablist.setAttribute("aria-orientation", narrow.matches ? "horizontal" : "vertical");
+  updateOrientation();
+  narrow.addEventListener("change", updateOrientation);
+
+  const lastIndex = projects.length - 1;
+  const pinOffset = () => siteHeader.offsetHeight + 24;
+  const pinMedia = window.matchMedia("(min-width: 881px) and (prefers-reduced-motion: no-preference)");
+  let pin = null;
+
+  // A Vitrine só pode ficar fixa se o painel mais alto couber inteiro na tela;
+  // senão o fim dele (e o "Ver no GitHub") ficaria inalcançável.
+  function tallestPanelFits() {
+    const current = panel.innerHTML;
+    let tallest = 0;
+    projects.forEach((project, index) => {
+      panel.innerHTML = renderProjectPanel(project, index);
+      tallest = Math.max(tallest, panel.offsetHeight);
+    });
+    panel.innerHTML = current;
+    return tallest <= window.innerHeight - pinOffset();
   }
 
-  gsap.to(modalDialog, {
-    y: 14,
-    opacity: 0,
-    duration: 0.18,
-    ease: "power2.in",
-    onComplete: finishClosing,
-  });
+  function createPin() {
+    const distancePerProject = () => window.innerHeight * 0.6;
+    // Durante um scroll disparado por aba, ignora as seleções intermediárias.
+    let pendingIndex = null;
+
+    pin = ScrollTrigger.create({
+      trigger: showcase,
+      start: () => `top ${pinOffset()}px`,
+      end: () => `+=${distancePerProject() * lastIndex}`,
+      pin: true,
+      invalidateOnRefresh: true,
+      onUpdate: (self) => {
+        const index = Math.round(self.progress * lastIndex);
+        if (pendingIndex !== null) {
+          if (index === pendingIndex) pendingIndex = null;
+          return;
+        }
+        select(index);
+      },
+    });
+
+    scrollToProject = (index) => {
+      pendingIndex = index;
+      const top = pin.start + (pin.end - pin.start) * (index / lastIndex);
+      window.scrollTo({ top, behavior: "smooth" });
+    };
+  }
+
+  function updatePin() {
+    const shouldPin = pinMedia.matches && tallestPanelFits();
+    if (shouldPin === Boolean(pin)) return;
+
+    if (shouldPin) {
+      createPin();
+    } else {
+      pin.kill(true);
+      pin = null;
+      scrollToProject = null;
+    }
+  }
+
+  updatePin();
+  pinMedia.addEventListener("change", updatePin);
+  window.addEventListener("resize", updatePin);
 }
 
 function setupMenu() {
@@ -215,41 +263,6 @@ function setupHeader() {
 
   updateHeader();
   window.addEventListener("scroll", updateHeader, { passive: true });
-}
-
-function setupModal() {
-  if (!modal) return;
-
-  modal.addEventListener("click", (event) => {
-    if (event.target.closest("[data-close-modal='true']")) {
-      closeProjectModal();
-    }
-  });
-
-  document.addEventListener("keydown", (event) => {
-    if (modal.hidden) return;
-
-    if (event.key === "Escape") {
-      closeProjectModal();
-      return;
-    }
-
-    if (event.key !== "Tab") return;
-
-    const focusable = getFocusableElements();
-    if (!focusable.length) return;
-
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
-    }
-  });
 }
 
 function setupSectionNavigation() {
@@ -295,17 +308,6 @@ function setupPointerInteractions() {
     heroVisual.style.setProperty("--tilt-x", "0deg");
     heroVisual.style.setProperty("--tilt-y", "0deg");
   });
-
-  document.querySelectorAll(".project-card").forEach((card) => {
-    card.addEventListener("pointermove", (event) => {
-      const bounds = card.getBoundingClientRect();
-      const x = ((event.clientX - bounds.left) / bounds.width) * 100;
-      const y = ((event.clientY - bounds.top) / bounds.height) * 100;
-
-      card.style.setProperty("--pointer-x", `${x}%`);
-      card.style.setProperty("--pointer-y", `${y}%`);
-    });
-  });
 }
 
 function setupMotion() {
@@ -313,22 +315,22 @@ function setupMotion() {
 
   const heroTimeline = gsap.timeline({ defaults: { ease: "power3.out" } });
   heroTimeline
-    .from(".site-header", { y: -16, autoAlpha: 0, duration: 0.55 })
+    .from(".site-header", { y: -16, opacity: 0, duration: 0.55 })
     .from(
       "[data-hero-reveal]",
-      { y: 26, autoAlpha: 0, duration: 0.72, stagger: 0.07 },
+      { y: 26, opacity: 0, duration: 0.72, stagger: 0.07 },
       "-=0.22",
     )
     .from(
       ".capability-card",
-      { x: 22, autoAlpha: 0, duration: 0.5, stagger: 0.08 },
+      { x: 22, opacity: 0, duration: 0.5, stagger: 0.08 },
       "-=0.42",
     );
 
   gsap.utils.toArray("[data-scroll-reveal]").forEach((element) => {
     gsap.from(element, {
       y: 28,
-      autoAlpha: 0,
+      opacity: 0,
       duration: 0.68,
       ease: "power3.out",
       scrollTrigger: {
@@ -341,12 +343,11 @@ function setupMotion() {
 }
 
 currentYear.textContent = new Date().getFullYear();
-renderProjects();
+setupShowcase();
 setupResumeLinks();
 setupTheme();
 setupMenu();
 setupHeader();
-setupModal();
 setupSectionNavigation();
 setupPointerInteractions();
 setupMotion();
