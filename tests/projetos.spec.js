@@ -5,20 +5,40 @@ const N8N = "Automação de Relatórios com n8n";
 const VBA = "Integração de IA com Excel via VBA";
 const BANKUP = "Bankup — Sistema Financeiro Web";
 const PROJETOS = [TAILOR_RESUME, N8N, VBA, BANKUP];
-const SEM_CODIGO_PUBLICO = [N8N, VBA, BANKUP];
 const REPOSITORIO_TAILOR_RESUME = "https://github.com/EduardoSSjr/tailor-resume";
+
+// A aba mostra só o nome curto do projeto, antes do travessão.
+const tituloCurto = (titulo) => titulo.split(" — ")[0];
 
 const secaoProjetos = (page) => page.getByRole("region", { name: "Projetos em destaque" });
 const abas = (page) => secaoProjetos(page).getByRole("tab");
-const aba = (page, titulo) => abas(page).filter({ hasText: titulo.split(" — ")[0] });
+const aba = (page, titulo) => abas(page).filter({ hasText: tituloCurto(titulo) });
 const painel = (page) => secaoProjetos(page).getByRole("tabpanel");
 
-// "instant": o site usa scroll-behavior: smooth, e a rolagem suave terminaria
-// depois de o teste já ter começado a medir.
 const irParaProjetos = (page) =>
-  secaoProjetos(page).evaluate((secao) =>
-    secao.scrollIntoView({ block: "start", behavior: "instant" }),
-  );
+  secaoProjetos(page).evaluate((secao) => secao.scrollIntoView({ block: "start" }));
+
+const indiceSelecionado = (page) =>
+  abas(page).evaluateAll((todas) => todas.findIndex((a) => a.getAttribute("aria-selected") === "true"));
+
+// Espera a rolagem terminar (duas leituras iguais seguidas) e devolve o scrollY final.
+async function scrollParado(page) {
+  let anterior = -1;
+  await expect
+    .poll(async () => {
+      const atual = await page.evaluate(() => window.scrollY);
+      const parado = atual === anterior;
+      anterior = atual;
+      return parado;
+    })
+    .toBe(true);
+  return anterior;
+}
+
+async function rolar(page, deltaY) {
+  await page.mouse.wheel(0, deltaY);
+  return scrollParado(page);
+}
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
@@ -28,7 +48,7 @@ test.beforeEach(async ({ page }) => {
 test("as abas listam tailor-resume, n8n, VBA e Bankup, nessa ordem", async ({ page }) => {
   await expect(abas(page)).toHaveCount(4);
   for (const [indice, titulo] of PROJETOS.entries()) {
-    await expect(abas(page).nth(indice)).toContainText(titulo.split(" — ")[0]);
+    await expect(abas(page).nth(indice)).toContainText(tituloCurto(titulo));
   }
 });
 
@@ -45,7 +65,9 @@ test("o tailor-resume abre selecionado, com o painel completo", async ({ page })
   await expect(projeto).toContainText("pedir isso a uma IA genérica");
   await expect(projeto).toContainText("Resultado");
   await expect(projeto).toContainText("qualquer um pode clonar o repositório");
-  await expect(projeto).toContainText("Spec-Driven Development");
+  await expect(projeto.getByRole("list", { name: "Tecnologias usadas" })).toContainText(
+    "Spec-Driven Development",
+  );
   await expect(projeto.getByRole("link", { name: "Ver no GitHub" })).toHaveAttribute(
     "href",
     REPOSITORIO_TAILOR_RESUME,
@@ -109,16 +131,12 @@ test.describe("teclado nas abas", () => {
   });
 });
 
-const indiceSelecionado = (page) =>
-  abas(page).evaluateAll((todas) => todas.findIndex((a) => a.getAttribute("aria-selected") === "true"));
-
 test.describe("desktop: Vitrine guiada pelo scroll", () => {
   test("rolar avança os projetos em ordem, com a Vitrine fixa na tela", async ({ page }) => {
     const vistos = [await indiceSelecionado(page)];
 
     for (let passo = 0; passo < 16 && vistos.at(-1) < 3; passo += 1) {
-      await page.mouse.wheel(0, 200);
-      await page.waitForTimeout(120);
+      await rolar(page, 200);
       const atual = await indiceSelecionado(page);
       if (atual !== vistos.at(-1)) vistos.push(atual);
       await expect(secaoProjetos(page).getByRole("tablist")).toBeInViewport();
@@ -128,31 +146,38 @@ test.describe("desktop: Vitrine guiada pelo scroll", () => {
   });
 
   test("clicar numa aba leva o scroll até o projeto dela, nos dois sentidos", async ({ page }) => {
-    const scrollY = () => page.evaluate(() => window.scrollY);
-    // Espera a rolagem suave terminar (duas leituras iguais seguidas).
-    const scrollParado = async () => {
-      let anterior = -1;
-      await expect
-        .poll(async () => {
-          const atual = await scrollY();
-          const parado = atual === anterior;
-          anterior = atual;
-          return parado;
-        })
-        .toBe(true);
-      return anterior;
-    };
-    const inicio = await scrollParado();
+    const inicio = await scrollParado(page);
 
     await aba(page, BANKUP).click();
-    const noBankup = await scrollParado();
+    const noBankup = await scrollParado(page);
     expect(noBankup).toBeGreaterThan(inicio + 200);
     await expect(aba(page, BANKUP)).toHaveAttribute("aria-selected", "true");
     await expect(painel(page).getByRole("heading", { name: BANKUP })).toBeVisible();
 
     await aba(page, TAILOR_RESUME).click();
-    expect(await scrollParado()).toBeLessThan(noBankup - 200);
+    expect(await scrollParado(page)).toBeLessThan(noBankup - 200);
     await expect(aba(page, TAILOR_RESUME)).toHaveAttribute("aria-selected", "true");
+  });
+
+  // Rolar por conta própria no meio do scroll disparado pela aba interrompe esse
+  // scroll antes do destino; a seleção precisa voltar a acompanhar a rolagem.
+  test("rolar durante o scroll de uma aba não trava a seleção", async ({ page }) => {
+    await aba(page, BANKUP).click();
+    const noBankup = await scrollParado(page);
+
+    await aba(page, TAILOR_RESUME).click();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(noBankup - 50);
+    // PageUp em vez da roda: page.mouse.wheel retorna antes de o evento chegar à página.
+    await page.keyboard.press("PageUp");
+    // Garante a interrupção, que no headless nem sempre acontece: para onde está.
+    await page.evaluate(() => window.scrollTo({ top: window.scrollY, behavior: "instant" }));
+    await scrollParado(page);
+
+    // O scroll interrompido nunca chegou ao tailor-resume; de volta ao fim, vale o Bankup.
+    await page.evaluate((y) => window.scrollTo({ top: y, behavior: "instant" }), noBankup - 20);
+    await scrollParado(page);
+
+    await expect(aba(page, BANKUP)).toHaveAttribute("aria-selected", "true");
   });
 });
 
@@ -170,9 +195,8 @@ for (const viewport of [
       let alcancou = false;
 
       for (let passo = 0; passo < 20 && !alcancou; passo += 1) {
-        await page.mouse.wheel(0, 120);
-        await page.waitForTimeout(60);
-        if (await aba(page, TAILOR_RESUME).getAttribute("aria-selected") !== "true") break;
+        await rolar(page, 120);
+        if ((await aba(page, TAILOR_RESUME).getAttribute("aria-selected")) !== "true") break;
         alcancou = await link.evaluate((el) => el.getBoundingClientRect().bottom <= innerHeight);
       }
 
@@ -184,6 +208,8 @@ for (const viewport of [
 for (const [contexto, opcoes] of [
   ["celular", { viewport: { width: 390, height: 844 } }],
   ["menos movimento", { reducedMotion: "reduce" }],
+  // Desktop largo, mas baixo demais para o painel mais alto: fixar esconderia o fim dele.
+  ["tela baixa demais para o painel", { viewport: { width: 1280, height: 560 } }],
 ]) {
   test.describe(`${contexto}: Vitrine sem pin`, () => {
     test.use(opcoes);

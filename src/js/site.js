@@ -12,6 +12,8 @@ const navLinks = document.querySelector(".nav-links");
 const siteHeader = document.querySelector(".site-header");
 const showcase = document.querySelector("#projects-showcase");
 const currentYear = document.querySelector("#current-year");
+// Mesmo breakpoint do bloco @media (max-width: 880px) do CSS.
+const narrowScreen = window.matchMedia("(max-width: 880px)");
 
 function setupTheme() {
   if (!themeToggle) return;
@@ -37,11 +39,14 @@ function setupResumeLinks() {
   });
 }
 
-const formatNumber = (index) => String(index + 1).padStart(2, "0");
+// Posição do projeto na lista, a partir de 1 e com dois dígitos: 0 -> "01".
+const formatOrdinal = (index) => String(index + 1).padStart(2, "0");
+// Nome curto exibido na aba: o título antes do travessão.
+const shortTitle = (project) => project.title.split(" — ")[0];
 
 function renderProjectPanel(project, index) {
   const technologies = project.technologies
-    .map((technology) => `<span>${technology}</span>`)
+    .map((technology) => `<li>${technology}</li>`)
     .join("");
 
   return `
@@ -51,7 +56,7 @@ function renderProjectPanel(project, index) {
         <small>${project.highlight}</small>
         ${project.inProgress ? `<span class="showcase-status">Em evolução</span>` : ""}
       </div>
-      <span class="showcase-count">${formatNumber(index)} / ${formatNumber(projects.length - 1)}</span>
+      <span class="showcase-count">${formatOrdinal(index)} / ${formatOrdinal(projects.length - 1)}</span>
     </div>
     <h3>${project.title}</h3>
     <p class="showcase-description">${project.description}</p>
@@ -65,7 +70,7 @@ function renderProjectPanel(project, index) {
         <p>${project.impact}</p>
       </div>
     </div>
-    <div class="showcase-technologies" aria-label="Tecnologias usadas">${technologies}</div>
+    <ul class="showcase-technologies" aria-label="Tecnologias usadas">${technologies}</ul>
     ${
       isOpenSource(project)
         ? `<a class="showcase-repository" href="${project.repository}" target="_blank" rel="noreferrer">
@@ -94,8 +99,8 @@ function setupShowcase() {
     tab.setAttribute("role", "tab");
     tab.setAttribute("aria-controls", panel.id);
     tab.innerHTML = `
-      <span class="showcase-tab-number" aria-hidden="true">${formatNumber(index)}</span>
-      <span class="showcase-tab-title">${project.title.split(" — ")[0]}</span>
+      <span class="showcase-tab-number" aria-hidden="true">${formatOrdinal(index)}</span>
+      <span class="showcase-tab-title">${shortTitle(project)}</span>
       <span class="showcase-tab-origin">${ORIGIN_LABELS[project.origin]}</span>
     `;
     tab.addEventListener("click", () => goTo(index));
@@ -156,27 +161,39 @@ function setupShowcase() {
   select(0);
 
   // No celular as abas viram uma faixa horizontal (veja o CSS).
-  const narrow = window.matchMedia("(max-width: 880px)");
   const updateOrientation = () =>
-    tablist.setAttribute("aria-orientation", narrow.matches ? "horizontal" : "vertical");
+    tablist.setAttribute("aria-orientation", narrowScreen.matches ? "horizontal" : "vertical");
   updateOrientation();
-  narrow.addEventListener("change", updateOrientation);
+  narrowScreen.addEventListener("change", updateOrientation);
 
   const lastIndex = projects.length - 1;
   const pinOffset = () => siteHeader.offsetHeight + 24;
-  const pinMedia = window.matchMedia("(min-width: 881px) and (prefers-reduced-motion: no-preference)");
   let pin = null;
+  let removePin = null;
 
   // A Vitrine só pode ficar fixa se o painel mais alto couber inteiro na tela;
-  // senão o fim dele (e o "Ver no GitHub") ficaria inalcançável.
+  // senão o fim dele (e o "Ver no GitHub") ficaria inalcançável. A medição usa
+  // um painel invisível à parte, com a mesma largura: o painel real não é
+  // tocado, então foco e animações em andamento seguem intactos.
   function tallestPanelFits() {
-    const current = panel.innerHTML;
-    let tallest = 0;
-    projects.forEach((project, index) => {
-      panel.innerHTML = renderProjectPanel(project, index);
-      tallest = Math.max(tallest, panel.offsetHeight);
+    const probe = document.createElement("div");
+    probe.className = panel.className;
+    probe.setAttribute("aria-hidden", "true");
+    probe.inert = true;
+    Object.assign(probe.style, {
+      position: "absolute",
+      visibility: "hidden",
+      width: `${panel.offsetWidth}px`,
     });
-    panel.innerHTML = current;
+    showcase.append(probe);
+
+    const tallest = Math.max(
+      ...projects.map((project, index) => {
+        probe.innerHTML = renderProjectPanel(project, index);
+        return probe.offsetHeight;
+      }),
+    );
+    probe.remove();
     return tallest <= window.innerHeight - pinOffset();
   }
 
@@ -184,6 +201,11 @@ function setupShowcase() {
     const distancePerProject = () => window.innerHeight * 0.6;
     // Durante um scroll disparado por aba, ignora as seleções intermediárias.
     let pendingIndex = null;
+    // Se a pessoa rolar por conta própria, o scroll da aba é interrompido e
+    // talvez nunca chegue ao destino: a seleção volta a seguir o scroll.
+    const releasePending = () => {
+      pendingIndex = null;
+    };
 
     pin = ScrollTrigger.create({
       trigger: showcase,
@@ -201,29 +223,51 @@ function setupShowcase() {
       },
     });
 
+    const userScrollEvents = ["wheel", "touchstart"];
+    userScrollEvents.forEach((type) =>
+      window.addEventListener(type, releasePending, { passive: true }),
+    );
+    // Teclas de rolagem também contam. As que as abas tratam (setas, Home, End)
+    // já chegam aqui com preventDefault e não rolam a página.
+    const releaseOnKey = (event) => {
+      if (!event.defaultPrevented) releasePending();
+    };
+    window.addEventListener("keydown", releaseOnKey);
+
     scrollToProject = (index) => {
       pendingIndex = index;
       const top = pin.start + (pin.end - pin.start) * (index / lastIndex);
       window.scrollTo({ top, behavior: "smooth" });
     };
-  }
 
-  function updatePin() {
-    const shouldPin = pinMedia.matches && tallestPanelFits();
-    if (shouldPin === Boolean(pin)) return;
-
-    if (shouldPin) {
-      createPin();
-    } else {
+    removePin = () => {
+      userScrollEvents.forEach((type) => window.removeEventListener(type, releasePending));
+      window.removeEventListener("keydown", releaseOnKey);
       pin.kill(true);
       pin = null;
       scrollToProject = null;
-    }
+    };
   }
 
+  function updatePin() {
+    const shouldPin = !narrowScreen.matches && !reducedMotion.matches && tallestPanelFits();
+    if (shouldPin === Boolean(pin)) return;
+
+    if (shouldPin) createPin();
+    else removePin();
+  }
+
+  // Debounce: só reavalia quando o redimensionamento para, e não a cada evento.
+  let resizeTimer;
+  const scheduleUpdatePin = () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(updatePin, 150);
+  };
+
   updatePin();
-  pinMedia.addEventListener("change", updatePin);
-  window.addEventListener("resize", updatePin);
+  narrowScreen.addEventListener("change", updatePin);
+  reducedMotion.addEventListener("change", updatePin);
+  window.addEventListener("resize", scheduleUpdatePin);
 }
 
 function setupMenu() {
@@ -249,8 +293,8 @@ function setupMenu() {
     if (event.key === "Escape") closeMenu();
   });
 
-  window.addEventListener("resize", () => {
-    if (window.innerWidth > 880) closeMenu();
+  narrowScreen.addEventListener("change", () => {
+    if (!narrowScreen.matches) closeMenu();
   });
 }
 
