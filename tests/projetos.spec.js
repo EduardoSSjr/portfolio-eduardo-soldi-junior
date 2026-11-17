@@ -132,17 +132,31 @@ test.describe("teclado nas abas", () => {
 });
 
 test.describe("desktop: Vitrine guiada pelo scroll", () => {
-  test("rolar avança os projetos em ordem, com a Vitrine fixa na tela", async ({ page }) => {
-    const vistos = [await indiceSelecionado(page)];
+  // Um giro da roda do mouse rola ~100px. Cada giro avança exatamente um projeto:
+  // nem trecho morto em que a Vitrine parece presa, nem projeto pulado.
+  test("cada giro da roda avança exatamente um projeto, com a Vitrine fixa", async ({ page }) => {
+    // Até o começo do trecho fixo: clicar na primeira aba depois da última leva lá.
+    await aba(page, BANKUP).click();
+    await scrollParado(page);
+    await aba(page, TAILOR_RESUME).click();
+    await scrollParado(page);
 
-    for (let passo = 0; passo < 16 && vistos.at(-1) < 3; passo += 1) {
-      await rolar(page, 200);
-      const atual = await indiceSelecionado(page);
-      if (atual !== vistos.at(-1)) vistos.push(atual);
+    for (const indice of [1, 2, 3]) {
+      await rolar(page, 100);
+      await expect.poll(() => indiceSelecionado(page)).toBe(indice);
       await expect(secaoProjetos(page).getByRole("tablist")).toBeInViewport();
     }
+  });
 
-    expect(vistos).toEqual([0, 1, 2, 3]);
+  test("trocar de projeto não muda a altura da Vitrine", async ({ page }) => {
+    const alturas = new Set();
+    for (const titulo of PROJETOS) {
+      await aba(page, titulo).click();
+      await expect(painel(page).getByRole("heading", { name: titulo })).toBeVisible();
+      alturas.add((await painel(page).boundingBox()).height);
+    }
+
+    expect(alturas.size).toBe(1);
   });
 
   test("clicar numa aba leva o scroll até o projeto dela, nos dois sentidos", async ({ page }) => {
@@ -194,8 +208,9 @@ for (const viewport of [
       const link = painel(page).getByRole("link", { name: "Ver no GitHub" });
       let alcancou = false;
 
-      for (let passo = 0; passo < 20 && !alcancou; passo += 1) {
-        await rolar(page, 120);
+      // Passos curtos: com a Vitrine fixa, o encaixe mantém o tailor-resume na tela.
+      for (let passo = 0; passo < 30 && !alcancou; passo += 1) {
+        await rolar(page, 30);
         if ((await aba(page, TAILOR_RESUME).getAttribute("aria-selected")) !== "true") break;
         alcancou = await link.evaluate((el) => el.getBoundingClientRect().bottom <= innerHeight);
       }

@@ -78,7 +78,7 @@ defineProject({
 
 A `origin` decide como o projeto aparece (veja os termos em `GLOSSARY.md`): só projetos de código aberto têm repositório e o link "Ver no GitHub". Uma combinação inválida — código aberto sem repositório, outra origem com repositório, origem desconhecida — lança um erro ao carregar o site, em vez de exibir um projeto inconsistente.
 
-Os projetos aparecem na **Vitrine**: uma aba por projeto, na ordem do array, e um painel com o projeto selecionado. No desktop a Vitrine fica fixa enquanto a página rola, e o scroll avança de um projeto para o próximo — desde que o painel mais alto caiba inteiro na tela. Em telas baixas, no celular e com `prefers-reduced-motion` ela rola como uma seção comum e as abas funcionam por clique e teclado. Por isso, se um projeto novo tiver textos muito longos, a Vitrine pode deixar de ficar fixa em notebooks menores.
+Os projetos aparecem na **Vitrine**: uma aba por projeto, na ordem do array, e um painel com o projeto selecionado. No desktop a Vitrine fica fixa enquanto a página rola, e cada giro da roda do mouse avança um projeto (`SCROLL_PER_PROJECT` em `src/js/site.js`), assentando no mais próximo quando a rolagem para — desde que o painel mais alto caiba inteiro na tela. O painel sempre tem a altura do projeto mais alto, então trocar de projeto não muda o tamanho da seção. Em telas baixas, no celular e com `prefers-reduced-motion` ela rola como uma seção comum e as abas funcionam por clique e teclado. Por isso, se um projeto novo tiver textos muito longos, a Vitrine pode deixar de ficar fixa em notebooks menores.
 
 ## Como fazer novos commits
 

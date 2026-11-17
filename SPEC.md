@@ -55,6 +55,7 @@ Clareza vem antes de efeito: um site sobrecarregado de animacao parece menos pro
 - Todo efeito tem um equivalente sem movimento, usado com prefers-reduced-motion: o conteudo e a navegacao continuam completos.
 - Animacoes mexem em opacidade e transformacao, nunca em visibility ou display de conteudo que precisa ser lido ou focado.
 - Sem cursor personalizado.
+- Rolagem guiada nunca pode parecer presa: na Vitrine fixa, pouco mais de um giro da roda do mouse avanca um projeto, a rolagem assenta no projeto mais proximo quando para, e trocar de projeto nao muda a altura da secao.
 - A Vitrine so fica fixa quando o painel mais alto cabe inteiro na tela (abaixo do cabecalho). Em telas baixas, no celular (ate 880px) e com prefers-reduced-motion, ela rola como uma secao comum e as abas funcionam por clique e teclado; fixar nesses casos tornaria o fim do painel, e o link "Ver no GitHub", inalcancavel.
 
 ## Requisitos Tecnicos

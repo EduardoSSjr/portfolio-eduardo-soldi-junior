@@ -14,6 +14,9 @@ const showcase = document.querySelector("#projects-showcase");
 const currentYear = document.querySelector("#current-year");
 // Mesmo breakpoint do bloco @media (max-width: 880px) do CSS.
 const narrowScreen = window.matchMedia("(max-width: 880px)");
+// Quanto rolar para avançar um projeto na Vitrine fixa: pouco mais de um giro
+// da roda do mouse (~100px), em qualquer tamanho de tela.
+const SCROLL_PER_PROJECT = 120;
 
 function setupTheme() {
   if (!themeToggle) return;
@@ -171,11 +174,10 @@ function setupShowcase() {
   let pin = null;
   let removePin = null;
 
-  // A Vitrine só pode ficar fixa se o painel mais alto couber inteiro na tela;
-  // senão o fim dele (e o "Ver no GitHub") ficaria inalcançável. A medição usa
-  // um painel invisível à parte, com a mesma largura: o painel real não é
-  // tocado, então foco e animações em andamento seguem intactos.
-  function tallestPanelFits() {
+  // Altura do painel mais alto. A medição usa um painel invisível à parte, com a
+  // mesma largura: o painel real não é tocado, então foco e animações em
+  // andamento seguem intactos.
+  function measureTallestPanel() {
     const probe = document.createElement("div");
     probe.className = panel.className;
     probe.setAttribute("aria-hidden", "true");
@@ -194,11 +196,10 @@ function setupShowcase() {
       }),
     );
     probe.remove();
-    return tallest <= window.innerHeight - pinOffset();
+    return tallest;
   }
 
   function createPin() {
-    const distancePerProject = () => window.innerHeight * 0.6;
     // Durante um scroll disparado por aba, ignora as seleções intermediárias.
     let pendingIndex = null;
     // Se a pessoa rolar por conta própria, o scroll da aba é interrompido e
@@ -210,8 +211,19 @@ function setupShowcase() {
     pin = ScrollTrigger.create({
       trigger: showcase,
       start: () => `top ${pinOffset()}px`,
-      end: () => `+=${distancePerProject() * lastIndex}`,
+      end: () => `+=${SCROLL_PER_PROJECT * lastIndex}`,
       pin: true,
+      // Prepara o pin um pouco antes de ele "pegar", evitando um tranco de um quadro.
+      anticipatePin: 1,
+      // Ao parar de rolar, assenta no projeto mais próximo. Sem inércia: a
+      // velocidade da rolagem não arremessa a Vitrine para um projeto adiante.
+      snap: {
+        snapTo: 1 / lastIndex,
+        inertia: false,
+        delay: 0.08,
+        duration: { min: 0.15, max: 0.3 },
+        ease: "power1.out",
+      },
       invalidateOnRefresh: true,
       onUpdate: (self) => {
         const index = Math.round(self.progress * lastIndex);
@@ -249,25 +261,35 @@ function setupShowcase() {
     };
   }
 
-  function updatePin() {
-    const shouldPin = !narrowScreen.matches && !reducedMotion.matches && tallestPanelFits();
-    if (shouldPin === Boolean(pin)) return;
+  function updateLayout() {
+    const tallest = measureTallestPanel();
 
-    if (shouldPin) createPin();
-    else removePin();
+    // No desktop, todo projeto ocupa a altura do mais alto: trocar de projeto
+    // não estica nem encolhe a Vitrine. No celular, cada painel tem sua altura,
+    // para projetos curtos não deixarem um vão na tela estreita.
+    panel.style.minHeight = narrowScreen.matches ? "" : `${tallest}px`;
+
+    // A Vitrine só pode ficar fixa se o painel mais alto couber inteiro na tela;
+    // senão o fim dele (e o "Ver no GitHub") ficaria inalcançável.
+    const fits = tallest <= window.innerHeight - pinOffset();
+    const shouldPin = !narrowScreen.matches && !reducedMotion.matches && fits;
+
+    if (shouldPin && !pin) createPin();
+    else if (!shouldPin && pin) removePin();
+    else if (pin) ScrollTrigger.refresh();
   }
 
   // Debounce: só reavalia quando o redimensionamento para, e não a cada evento.
   let resizeTimer;
-  const scheduleUpdatePin = () => {
+  const scheduleUpdateLayout = () => {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(updatePin, 150);
+    resizeTimer = setTimeout(updateLayout, 150);
   };
 
-  updatePin();
-  narrowScreen.addEventListener("change", updatePin);
-  reducedMotion.addEventListener("change", updatePin);
-  window.addEventListener("resize", scheduleUpdatePin);
+  updateLayout();
+  narrowScreen.addEventListener("change", updateLayout);
+  reducedMotion.addEventListener("change", updateLayout);
+  window.addEventListener("resize", scheduleUpdateLayout);
 }
 
 function setupMenu() {
