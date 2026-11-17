@@ -4,121 +4,260 @@ const TAILOR_RESUME = "tailor-resume — Skill de IA para adaptar currículos";
 const N8N = "Automação de Relatórios com n8n";
 const VBA = "Integração de IA com Excel via VBA";
 const BANKUP = "Bankup — Sistema Financeiro Web";
-const SEM_CODIGO_PUBLICO = [N8N, VBA, BANKUP];
+const PROJETOS = [TAILOR_RESUME, N8N, VBA, BANKUP];
 const REPOSITORIO_TAILOR_RESUME = "https://github.com/EduardoSSjr/tailor-resume";
 
+// A aba mostra só o nome curto do projeto, antes do travessão.
+const tituloCurto = (titulo) => titulo.split(" — ")[0];
+
 const secaoProjetos = (page) => page.getByRole("region", { name: "Projetos em destaque" });
-const projetos = (page) => secaoProjetos(page).getByRole("article");
-const card = (page, titulo) =>
-  projetos(page).filter({ has: page.getByRole("heading", { name: titulo }) });
-const botaoDetalhes = (page, titulo) =>
-  page.getByRole("button", { name: `Ver detalhes do projeto ${titulo}` });
+const abas = (page) => secaoProjetos(page).getByRole("tab");
+const aba = (page, titulo) => abas(page).filter({ hasText: tituloCurto(titulo) });
+const painel = (page) => secaoProjetos(page).getByRole("tabpanel");
+
+const irParaProjetos = (page) =>
+  secaoProjetos(page).evaluate((secao) => secao.scrollIntoView({ block: "start" }));
+
+const indiceSelecionado = (page) =>
+  abas(page).evaluateAll((todas) => todas.findIndex((a) => a.getAttribute("aria-selected") === "true"));
+
+// Espera a rolagem terminar (duas leituras iguais seguidas) e devolve o scrollY final.
+async function scrollParado(page) {
+  let anterior = -1;
+  await expect
+    .poll(async () => {
+      const atual = await page.evaluate(() => window.scrollY);
+      const parado = atual === anterior;
+      anterior = atual;
+      return parado;
+    })
+    .toBe(true);
+  return anterior;
+}
+
+async function rolar(page, deltaY) {
+  await page.mouse.wheel(0, deltaY);
+  return scrollParado(page);
+}
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
-  // Os cards só aparecem quando entram na tela (animação de scroll), como para
-  // um visitante de verdade: rola até o fim da seção antes de cada teste.
-  await secaoProjetos(page).evaluate((secao) => secao.scrollIntoView({ block: "end" }));
+  await irParaProjetos(page);
 });
 
-test("tailor-resume é o primeiro projeto, seguido de n8n, VBA e Bankup", async ({ page }) => {
-  await expect(projetos(page).getByRole("heading", { level: 3 })).toHaveText([
-    TAILOR_RESUME,
-    N8N,
-    VBA,
-    BANKUP,
-  ]);
+test("as abas listam tailor-resume, n8n, VBA e Bankup, nessa ordem", async ({ page }) => {
+  await expect(abas(page)).toHaveCount(4);
+  for (const [indice, titulo] of PROJETOS.entries()) {
+    await expect(abas(page).nth(indice)).toContainText(tituloCurto(titulo));
+  }
 });
 
-// O selo exato também garante que o card corporativo não acrescenta o nome da
-// empresa ("Corporativo · ...").
+test("o tailor-resume abre selecionado, com o painel completo", async ({ page }) => {
+  await expect(aba(page, TAILOR_RESUME)).toHaveAttribute("aria-selected", "true");
+
+  const projeto = painel(page);
+  await expect(projeto.getByRole("heading", { name: TAILOR_RESUME })).toBeVisible();
+  await expect(projeto.getByText("Código aberto", { exact: true })).toBeVisible();
+  await expect(projeto.getByText("Em evolução", { exact: true })).toBeVisible();
+  await expect(projeto.getByText("Skill de IA", { exact: true })).toBeVisible();
+  await expect(projeto).toContainText("sem nunca inventar experiência");
+  await expect(projeto).toContainText("Contexto");
+  await expect(projeto).toContainText("pedir isso a uma IA genérica");
+  await expect(projeto).toContainText("Resultado");
+  await expect(projeto).toContainText("qualquer um pode clonar o repositório");
+  await expect(projeto.getByRole("list", { name: "Tecnologias usadas" })).toContainText(
+    "Spec-Driven Development",
+  );
+  await expect(projeto.getByRole("link", { name: "Ver no GitHub" })).toHaveAttribute(
+    "href",
+    REPOSITORIO_TAILOR_RESUME,
+  );
+});
+
 for (const [titulo, origem] of [
-  [TAILOR_RESUME, "Código aberto"],
   [N8N, "Corporativo"],
   [VBA, "Corporativo"],
   [BANKUP, "Acadêmico"],
 ]) {
-  test(`card "${titulo}" mostra o selo de origem ${origem}`, async ({ page }) => {
-    await expect(card(page, titulo).getByText(origem, { exact: true })).toBeVisible();
-  });
-}
-
-test("card do tailor-resume está em evolução e leva ao repositório no GitHub", async ({ page }) => {
-  const tailorResume = card(page, TAILOR_RESUME);
-
-  await expect(tailorResume).toContainText("Em evolução");
-  await expect(tailorResume.getByRole("link")).toHaveAttribute("href", REPOSITORIO_TAILOR_RESUME);
-});
-
-for (const titulo of SEM_CODIGO_PUBLICO) {
-  test(`projeto sem código público "${titulo}" não tem repositório nem etiqueta de evolução`, async ({
+  test(`projeto sem código público "${titulo}" mostra ${origem}, sem repositório nem evolução`, async ({
     page,
   }) => {
-    await expect(card(page, titulo).getByRole("link")).toHaveCount(0);
-    await expect(card(page, titulo)).not.toContainText("Em evolução");
+    await aba(page, titulo).click();
+
+    await expect(aba(page, titulo)).toHaveAttribute("aria-selected", "true");
+    const projeto = painel(page);
+    await expect(projeto.getByRole("heading", { name: titulo })).toBeVisible();
+    await expect(projeto.getByText(origem, { exact: true })).toBeVisible();
+    await expect(projeto.getByRole("link")).toHaveCount(0);
+    await expect(projeto).not.toContainText("Em evolução");
   });
 }
 
-test("a página não tem links para #", async ({ page }) => {
-  await expect(page.locator('a[href="#"]')).toHaveCount(0);
+test.describe("teclado nas abas", () => {
+  test("setas movem seleção e foco entre as abas, com volta nas pontas", async ({ page }) => {
+    await aba(page, TAILOR_RESUME).focus();
+
+    await page.keyboard.press("ArrowDown");
+    await expect(aba(page, N8N)).toBeFocused();
+    await expect(aba(page, N8N)).toHaveAttribute("aria-selected", "true");
+    await expect(painel(page).getByRole("heading", { name: N8N })).toBeVisible();
+
+    await page.keyboard.press("ArrowRight");
+    await expect(aba(page, VBA)).toHaveAttribute("aria-selected", "true");
+
+    await page.keyboard.press("ArrowUp");
+    await page.keyboard.press("ArrowLeft");
+    await page.keyboard.press("ArrowUp");
+    await expect(aba(page, BANKUP)).toBeFocused();
+    await expect(aba(page, BANKUP)).toHaveAttribute("aria-selected", "true");
+  });
+
+  test("Home e End vão para a primeira e a última aba", async ({ page }) => {
+    await aba(page, TAILOR_RESUME).focus();
+
+    await page.keyboard.press("End");
+    await expect(aba(page, BANKUP)).toHaveAttribute("aria-selected", "true");
+
+    await page.keyboard.press("Home");
+    await expect(aba(page, TAILOR_RESUME)).toBeFocused();
+    await expect(aba(page, TAILOR_RESUME)).toHaveAttribute("aria-selected", "true");
+  });
+
+  test("só a aba selecionada entra na ordem do Tab, e o Tab segue para o painel", async ({ page }) => {
+    await aba(page, TAILOR_RESUME).focus();
+
+    await page.keyboard.press("Tab");
+    await expect(painel(page)).toBeFocused();
+  });
 });
 
-test.describe("detalhes do projeto", () => {
-  test("projeto de código aberto oferece Ver no GitHub", async ({ page }) => {
-    await botaoDetalhes(page, TAILOR_RESUME).click();
+test.describe("desktop: Vitrine guiada pelo scroll", () => {
+  // Um giro da roda do mouse rola ~100px. Cada giro avança exatamente um projeto:
+  // nem trecho morto em que a Vitrine parece presa, nem projeto pulado.
+  test("cada giro da roda avança exatamente um projeto, com a Vitrine fixa", async ({ page }) => {
+    // Até o começo do trecho fixo: clicar na primeira aba depois da última leva lá.
+    await aba(page, BANKUP).click();
+    await scrollParado(page);
+    await aba(page, TAILOR_RESUME).click();
+    await scrollParado(page);
 
-    const dialogo = page.getByRole("dialog", { name: TAILOR_RESUME });
-    await expect(dialogo).toBeVisible();
-    await expect(dialogo.getByRole("link", { name: "Ver no GitHub" })).toHaveAttribute(
-      "href",
-      REPOSITORIO_TAILOR_RESUME,
-    );
+    for (const indice of [1, 2, 3]) {
+      await rolar(page, 100);
+      await expect.poll(() => indiceSelecionado(page)).toBe(indice);
+      await expect(secaoProjetos(page).getByRole("tablist")).toBeInViewport();
+    }
   });
 
-  for (const titulo of SEM_CODIGO_PUBLICO) {
-    test(`projeto sem código público "${titulo}" abre sem nenhum link`, async ({ page }) => {
-      await botaoDetalhes(page, titulo).click();
+  test("trocar de projeto não muda a altura da Vitrine", async ({ page }) => {
+    const alturas = new Set();
+    for (const titulo of PROJETOS) {
+      await aba(page, titulo).click();
+      await expect(painel(page).getByRole("heading", { name: titulo })).toBeVisible();
+      alturas.add((await painel(page).boundingBox()).height);
+    }
 
-      const dialogo = page.getByRole("dialog", { name: titulo });
-      await expect(dialogo).toBeVisible();
-      await expect(dialogo.getByRole("link")).toHaveCount(0);
-    });
-  }
-
-  test("clicar no corpo do card abre os detalhes", async ({ page }) => {
-    await card(page, BANKUP).getByRole("heading", { name: BANKUP }).click();
-
-    await expect(page.getByRole("dialog", { name: BANKUP })).toBeVisible();
+    expect(alturas.size).toBe(1);
   });
 
-  test("Esc fecha e devolve o foco ao card", async ({ page }) => {
-    await botaoDetalhes(page, N8N).click();
-    await expect(page.getByRole("dialog")).toBeVisible();
+  test("clicar numa aba leva o scroll até o projeto dela, nos dois sentidos", async ({ page }) => {
+    const inicio = await scrollParado(page);
 
-    await page.keyboard.press("Escape");
+    await aba(page, BANKUP).click();
+    const noBankup = await scrollParado(page);
+    expect(noBankup).toBeGreaterThan(inicio + 200);
+    await expect(aba(page, BANKUP)).toHaveAttribute("aria-selected", "true");
+    await expect(painel(page).getByRole("heading", { name: BANKUP })).toBeVisible();
 
-    await expect(page.getByRole("dialog")).toBeHidden();
-    await expect(botaoDetalhes(page, N8N)).toBeFocused();
+    await aba(page, TAILOR_RESUME).click();
+    expect(await scrollParado(page)).toBeLessThan(noBankup - 200);
+    await expect(aba(page, TAILOR_RESUME)).toHaveAttribute("aria-selected", "true");
   });
 
-  test("botão Fechar fecha e devolve o foco ao card", async ({ page }) => {
-    await botaoDetalhes(page, TAILOR_RESUME).click();
+  // Rolar por conta própria no meio do scroll disparado pela aba interrompe esse
+  // scroll antes do destino; a seleção precisa voltar a acompanhar a rolagem.
+  test("rolar durante o scroll de uma aba não trava a seleção", async ({ page }) => {
+    await aba(page, BANKUP).click();
+    const noBankup = await scrollParado(page);
 
-    await page.getByRole("button", { name: "Fechar detalhes do projeto" }).click();
+    await aba(page, TAILOR_RESUME).click();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(noBankup - 50);
+    // PageUp em vez da roda: page.mouse.wheel retorna antes de o evento chegar à página.
+    await page.keyboard.press("PageUp");
+    // Garante a interrupção, que no headless nem sempre acontece: para onde está.
+    await page.evaluate(() => window.scrollTo({ top: window.scrollY, behavior: "instant" }));
+    await scrollParado(page);
 
-    await expect(page.getByRole("dialog")).toBeHidden();
-    await expect(botaoDetalhes(page, TAILOR_RESUME)).toBeFocused();
+    // O scroll interrompido nunca chegou ao tailor-resume; de volta ao fim, vale o Bankup.
+    await page.evaluate((y) => window.scrollTo({ top: y, behavior: "instant" }), noBankup - 20);
+    await scrollParado(page);
+
+    await expect(aba(page, BANKUP)).toHaveAttribute("aria-selected", "true");
   });
+});
 
-  for (const tecla of ["Tab", "Shift+Tab"]) {
-    test(`${tecla} não deixa o foco sair do modal aberto`, async ({ page }) => {
-      await botaoDetalhes(page, TAILOR_RESUME).click();
-      const dialogo = page.getByRole("dialog", { name: TAILOR_RESUME });
+// Se a Vitrine fixa for mais alta que a tela, o fim do painel fica inalcançável.
+for (const viewport of [
+  { width: 1280, height: 720 },
+  { width: 1024, height: 768 },
+  { width: 900, height: 700 },
+]) {
+  test.describe(`tela ${viewport.width}x${viewport.height}`, () => {
+    test.use({ viewport });
 
-      for (let i = 0; i < 4; i += 1) {
-        await page.keyboard.press(tecla);
-        await expect(dialogo.locator(":focus")).toHaveCount(1);
+    test("rolando, o painel inteiro do tailor-resume aparece na tela", async ({ page }) => {
+      const link = painel(page).getByRole("link", { name: "Ver no GitHub" });
+      let alcancou = false;
+
+      // Passos curtos: com a Vitrine fixa, o encaixe mantém o tailor-resume na tela.
+      for (let passo = 0; passo < 30 && !alcancou; passo += 1) {
+        await rolar(page, 30);
+        if ((await aba(page, TAILOR_RESUME).getAttribute("aria-selected")) !== "true") break;
+        alcancou = await link.evaluate((el) => el.getBoundingClientRect().bottom <= innerHeight);
       }
+
+      expect(alcancou).toBe(true);
     });
-  }
+  });
+}
+
+for (const [contexto, opcoes] of [
+  ["celular", { viewport: { width: 390, height: 844 } }],
+  ["menos movimento", { reducedMotion: "reduce" }],
+  // Desktop largo, mas baixo demais para o painel mais alto: fixar esconderia o fim dele.
+  ["tela baixa demais para o painel", { viewport: { width: 1280, height: 560 } }],
+]) {
+  test.describe(`${contexto}: Vitrine sem pin`, () => {
+    test.use(opcoes);
+
+    test("rolar passa pela Vitrine sem trocar de projeto", async ({ page }) => {
+      for (let passo = 0; passo < 8; passo += 1) {
+        await page.mouse.wheel(0, 250);
+      }
+
+      await expect(secaoProjetos(page).getByRole("tablist")).not.toBeInViewport();
+      await expect(aba(page, TAILOR_RESUME)).toHaveAttribute("aria-selected", "true");
+    });
+
+    test("as abas trocam o projeto por clique", async ({ page }) => {
+      await aba(page, VBA).click();
+
+      await expect(aba(page, VBA)).toHaveAttribute("aria-selected", "true");
+      await expect(painel(page).getByRole("heading", { name: VBA })).toBeVisible();
+    });
+  });
+}
+
+// As entradas no scroll não podem tirar conteúdo da árvore de acessibilidade
+// (visibility: hidden): getByRole só encontra o que um leitor de tela encontra.
+test("os projetos já estão acessíveis a leitores de tela antes de rolar até eles", async ({ page }) => {
+  await page.goto("/");
+
+  await expect(page.getByRole("heading", { level: 2, name: "Projetos em destaque" })).toBeAttached();
+  await expect(abas(page)).toHaveCount(4);
+});
+
+test("a página não tem links para # nem janela de detalhes", async ({ page }) => {
+  await expect(page.locator('a[href="#"]')).toHaveCount(0);
+  // getByRole ignora elementos ocultos; o modal fechado passaria despercebido.
+  await expect(page.locator('[role="dialog"]')).toHaveCount(0);
 });

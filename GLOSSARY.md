@@ -28,6 +28,10 @@ _Avoid_: profissional, interno, privado
 Origem de um projeto feito como parte da formação, por exemplo o projeto integrador da FATEC.
 _Avoid_: faculdade, estudo
 
+**Vitrine**:
+A seção de projetos: uma aba por projeto e um painel com o projeto selecionado. No desktop pode ficar fixa enquanto a página rola, com o scroll avançando de um projeto para o próximo.
+_Avoid_: carrossel, slider, cards de projetos
+
 **Em evolução**:
 Estado de um projeto que Eduardo continua desenvolvendo ativamente, sinalizado para que lacunas atuais sejam lidas como trabalho em andamento.
 _Avoid_: beta, em desenvolvimento, WIP

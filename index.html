@@ -251,7 +251,10 @@
             </p>
           </div>
 
-          <div class="projects-grid" id="projects-list" aria-live="polite"></div>
+          <div class="showcase" id="projects-showcase">
+            <div class="showcase-tabs" role="tablist" aria-label="Projetos" aria-orientation="vertical"></div>
+            <article class="showcase-panel" id="projeto-painel" role="tabpanel" tabindex="0"></article>
+          </div>
         </div>
       </section>
 
@@ -313,37 +316,6 @@
         <a href="#inicio">Voltar ao início <span aria-hidden="true">↑</span></a>
       </div>
     </footer>
-
-    <div class="modal" id="project-modal" aria-hidden="true" hidden>
-      <div class="modal-backdrop" data-close-modal="true"></div>
-      <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-        <button class="modal-close" type="button" aria-label="Fechar detalhes do projeto" data-close-modal="true">
-          Fechar <span aria-hidden="true">×</span>
-        </button>
-
-        <div class="modal-content">
-          <p class="section-label" id="modal-highlight"></p>
-          <h3 id="modal-title"></h3>
-          <p id="modal-description"></p>
-
-          <div class="modal-grid">
-            <article>
-              <span>Contexto</span>
-              <p id="modal-context"></p>
-            </article>
-            <article>
-              <span>Resultado</span>
-              <p id="modal-impact"></p>
-            </article>
-          </div>
-
-          <div class="tech-list" id="modal-technologies" aria-label="Tecnologias do projeto"></div>
-          <a class="button button-primary modal-link" id="modal-link" target="_blank" rel="noreferrer" hidden>
-            Ver no GitHub <span aria-hidden="true">↗</span>
-          </a>
-        </div>
-      </div>
-    </div>
 
     <script type="module" src="/src/js/site.js"></script>
   </body>

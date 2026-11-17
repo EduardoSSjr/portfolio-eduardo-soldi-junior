@@ -66,17 +66,19 @@ Edite `src/js/projects.js` e adicione um item ao array `projects`, envolvido em 
 defineProject({
   title: "Nome do projeto",
   origin: "corporate", // "open-source" | "corporate" | "academic"
-  description: "Descrição curta, exibida no card.",
+  description: "Descrição curta, exibida no painel da Vitrine.",
   technologies: ["Tecnologia 1", "Tecnologia 2"],
   highlight: "Área do projeto",
-  context: "Qual problema o projeto resolve (exibido nos detalhes).",
-  impact: "O que mudou, sem números inventados (exibido nos detalhes).",
+  context: "Qual problema o projeto resolve (exibido no painel).",
+  impact: "O que mudou, sem números inventados (exibido no painel).",
   repository: "https://github.com/...", // só para "open-source", obrigatório nele
   inProgress: true, // opcional: exibe a etiqueta "Em evolução"
 })
 ```
 
-A `origin` decide como o projeto aparece (veja os termos em `GLOSSARY.md`): só projetos de código aberto têm repositório e o atalho "Código no GitHub". Uma combinação inválida — código aberto sem repositório, outra origem com repositório, origem desconhecida — lança um erro ao carregar o site, em vez de exibir um card inconsistente.
+A `origin` decide como o projeto aparece (veja os termos em `GLOSSARY.md`): só projetos de código aberto têm repositório e o link "Ver no GitHub". Uma combinação inválida — código aberto sem repositório, outra origem com repositório, origem desconhecida — lança um erro ao carregar o site, em vez de exibir um projeto inconsistente.
+
+Os projetos aparecem na **Vitrine**: uma aba por projeto, na ordem do array, e um painel com o projeto selecionado. No desktop a Vitrine fica fixa enquanto a página rola, e cada giro da roda do mouse avança um projeto (`SCROLL_PER_PROJECT` em `src/js/site.js`), assentando no mais próximo quando a rolagem para — desde que o painel mais alto caiba inteiro na tela. O painel sempre tem a altura do projeto mais alto, então trocar de projeto não muda o tamanho da seção. Em telas baixas, no celular e com `prefers-reduced-motion` ela rola como uma seção comum e as abas funcionam por clique e teclado. Por isso, se um projeto novo tiver textos muito longos, a Vitrine pode deixar de ficar fixa em notebooks menores.
 
 ## Como fazer novos commits
 

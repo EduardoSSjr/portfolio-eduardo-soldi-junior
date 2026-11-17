@@ -27,7 +27,7 @@ Eduardo combina experiencia real em operacao e infraestrutura corporativa com de
 - Cargo: Analista e Desenvolvedor de Sistemas.
 - Focos: desenvolvimento de sistemas, analise de sistemas, automacoes, dados, inteligencia artificial e infraestrutura.
 - Contatos atuais: eduardosjr06@gmail.com, WhatsApp +55 12 98202-2685, LinkedIn linkedin.com/in/eduardosoldi, GitHub github.com/EduardoSSjr.
-- Projetos existentes em src/js/projects.js, mantidos como dados editaveis e exibidos em cards/modais.
+- Projetos existentes em src/js/projects.js, mantidos como dados editaveis e exibidos na Vitrine (abas + painel com descricao, contexto e resultado).
 - Secoes: inicio, sobre, habilidades, projetos e contato.
 - Vercel Analytics ja esta configurado via script em index.html.
 
@@ -46,11 +46,23 @@ Eduardo combina experiencia real em operacao e infraestrutura corporativa com de
 - Respeitar prefers-reduced-motion: reduzir ou remover animacoes para usuarios que solicitam menos movimento.
 - Nenhuma animacao deve bloquear navegacao, esconder informacao ou causar mudancas bruscas de layout.
 
+### Orcamento de movimento
+
+Clareza vem antes de efeito: um site sobrecarregado de animacao parece menos profissional, nao mais.
+
+- No maximo um efeito de destaque por tela (por exemplo, a Vitrine fixa guiada pelo scroll); o resto usa entradas discretas.
+- Nenhuma animacao passa de ~0,8 s.
+- Todo efeito tem um equivalente sem movimento, usado com prefers-reduced-motion: o conteudo e a navegacao continuam completos.
+- Animacoes mexem em opacidade e transformacao, nunca em visibility ou display de conteudo que precisa ser lido ou focado.
+- Sem cursor personalizado.
+- Rolagem guiada nunca pode parecer presa: na Vitrine fixa, pouco mais de um giro da roda do mouse avanca um projeto, a rolagem assenta no projeto mais proximo quando para, e trocar de projeto nao muda a altura da secao.
+- A Vitrine so fica fixa quando o painel mais alto cabe inteiro na tela (abaixo do cabecalho). Em telas baixas, no celular (ate 880px) e com prefers-reduced-motion, ela rola como uma secao comum e as abas funcionam por clique e teclado; fixar nesses casos tornaria o fim do painel, e o link "Ver no GitHub", inalcancavel.
+
 ## Requisitos Tecnicos
 
 - Manter HTML, CSS e JavaScript puro; nao migrar para framework sem aprovacao explicita.
 - Manter layout responsivo para desktop e celular.
-- Usar semanticamente HTML, foco visivel, menu acessivel e modal operavel por teclado.
+- Usar semanticamente HTML, foco visivel, menu acessivel e abas da Vitrine operaveis por teclado (padrao de abas da ARIA).
 - Usar assets locais otimizados quando houver imagens; nao usar links temporarios locais ou arquivos fora do repositorio.
 - Garantir que todos os links de email, WhatsApp, LinkedIn, GitHub, projetos e curriculo funcionem.
 - Preservar o deploy atual via GitHub para Vercel e dominio esjr.com.br.
